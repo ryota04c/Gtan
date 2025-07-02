@@ -293,8 +293,9 @@ function updateCars(delta) {
 }
 //データ転送
 function sendResultToSheet(car) {
-    fetch("https://script.google.com/macros/s/AKfycbxAQljX07X9g-uRoSzeas7Lx2LNP0h_C_TlY5N6MaGImlAW-3Amo57mYjehPnk2rfM/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbxF6ldhtbvAFX1fiEX_A1MvNNFt9iCTGS3-rrKuH_waXvdeVBTFbZAKWUTxOXB6Xixn/exec", {
         method: "POST",
+        mode: "cors",
         body: JSON.stringify({
             feeling: car.feeling,
             runTime: car.runtime,
