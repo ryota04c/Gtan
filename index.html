@@ -295,16 +295,15 @@ function updateCars(delta) {
 function sendResultToSheet(car) {
     fetch("https://script.google.com/macros/s/AKfycbxF6ldhtbvAFX1fiEX_A1MvNNFt9iCTGS3-rrKuH_waXvdeVBTFbZAKWUTxOXB6Xixn/exec", {
         method: "POST",
-        mode: "cors",
+        headers: {
+            "Content-Type": "text/plain" // ← JSONではなくtext/plainを使う
+        },
         body: JSON.stringify({
             feeling: car.feeling,
-            runTime: car.runtime,
+            runTime: car.runTime,
             totalLength: car.totalLength,
             CO2: car.CO2
-        }),
-        headers: {
-            "Content-Type": "application/json"
-        }
+      	})
     })
     .then(res => res.text())
     .then(data => console.log("送信成功:", data))
