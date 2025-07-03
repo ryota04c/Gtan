@@ -165,12 +165,9 @@ function updateCars(delta) {
                     other.route[k] === currentFrom &&
                     other.route[k + 1] === currentTo
                 ) {
-                    let gap = 0;
-                    gapX = other.x - car.x;
-                    gapY = other.y - car.y;
-                    gap = Math.sqrt((gapX)*gapX + (gapY)*gapY);
+                    let gap = other.traveled-car.traveled
     
-                    if (stopLength+10 > gap) {
+                    if (stopLength+10 > gap && gap>0) {
                         stop = true;
                         foundFrontCar = true;
                         break;
