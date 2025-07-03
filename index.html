@@ -268,7 +268,7 @@ function updateCars(delta) {
 
         if (car.traveled >= distanceInSection) {
             car.routeIndex++;
-            car.traveled = 0;
+            car.traveled -=distanceInsection;
         }
 
         // --------- ⑥ ルート終了判定 ---------
