@@ -183,8 +183,6 @@ function updateCars(delta) {
             let nextTo = car.route[car.routeIndex + 2];
             let nextSection = mapList.find(s => s.from === nextFrom && s.to === nextTo);
 
-            let minDistance = Infinity;
-
             for (let j = 0; j < cars.length; j++) {
                 if (j === i) continue;
                 const other = cars[j];
@@ -195,17 +193,12 @@ function updateCars(delta) {
                     ) {
                         const distanceRemaining = distanceInSection - car.traveled;
                         const totalGap = distanceRemaining + other.traveled;
-                        if (totalGap < minDistance) {
-                            minDistance = totalGap;
+                        if (totalGap < stopLength+10) {
+                            console.log("次区間");
+                            stop = true;
+                            break;
                         }
                     }
-                }
-            }
-
-            if (minDistance !== Infinity) {
-                if (stopLength+5 > minDistance){
-                    console.log("次区間");
-                    stop = true;
                 }
             }
         }
