@@ -159,22 +159,20 @@ function updateCars(delta) {
         for (let j = 0; j < cars.length; j++) {
             if (j === i) continue;
             const other = cars[j];
-            
-            for (let k=0; k< other.routeMax+1;k++){
-                if (
-                    other.route[k] === currentFrom &&
-                    other.route[k + 1] === currentTo
-                ) {
-                    let gap = other.traveled-car.traveled
-    
-                    if (stopLength+10 > gap && gap>0) {
-                        console.log("同区間");
-                        stop = true;
-                        foundFrontCar = true;
-                        break;
-                    }
+            if (
+                other.route[other.routeIndex] === currentFrom &&
+                other.route[other.routeIndex + 1] === currentTo
+            ) {
+                let gap = other.traveled-car.traveled
+
+                if (stopLength+10 > gap && gap>0) {
+                    console.log("同区間");
+                    stop = true;
+                    foundFrontCar = true;
+                    break;
                 }
             }
+            
         }
 
         // --------- ② 次区間の前方車チェック ---------
@@ -190,6 +188,7 @@ function updateCars(delta) {
                 const other = cars[j];
             
                 // other.car が次の区間を実際に走っているときだけチェック
+                if(other.route.length === other.routeIndex+1)continue;
                 const from = other.route[other.routeIndex];
                 const to = other.route[other.routeIndex + 1];
                 if (from === nextFrom && to === nextTo) {
@@ -271,7 +270,7 @@ function updateCars(delta) {
 
         if (car.traveled >= distanceInSection) {
             car.routeIndex++;
-            car.traveled -=distanceInSection;
+            car.traveled = 0;
         }
 
         // --------- ⑥ ルート終了判定 ---------
