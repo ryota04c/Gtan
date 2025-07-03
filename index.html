@@ -150,9 +150,9 @@ function updateCars(delta) {
         const carFrontY = car.y-carWidth/2*Math.sin(section.direction_arg * Math.PI);
         
         //車の停止距離を認識
-        let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.75;
+        let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
         //高速域では速度に応じた誤差を導入
-        if(car.speed > 4.17)stopLength += car.speed*Math.random()/3;
+        if(car.speed > 4.17)stopLength += car.speed*Math.random()/4;
 
         // --------- ① 同じ区間内の前方車チェック ---------
         let foundFrontCar = false;
