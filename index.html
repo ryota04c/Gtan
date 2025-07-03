@@ -258,7 +258,7 @@ function updateCars(delta) {
             car.crowdTime += delta/1000;
             car.crowdLength += moveDistance;
         }else if(speed2 > 15&&car.crowdTime !== 0){
-            const feelingBase = car.crowdLength/car.crowdTime * 3.6;
+            const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
             const feelingNew = feelingBase* car.crowdTime;
             car.feeling = Math.max(car.feeling,feelingNew);
             car.crowdTime = 0;
