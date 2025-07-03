@@ -168,6 +168,7 @@ function updateCars(delta) {
                     let gap = other.traveled-car.traveled
     
                     if (stopLength+10 > gap && gap>0) {
+                        console.log("同区間");
                         stop = true;
                         foundFrontCar = true;
                         break;
@@ -203,6 +204,7 @@ function updateCars(delta) {
 
             if (minDistance !== Infinity) {
                 if (stopLength+5 > minDistance){
+                    console.log("次区間");
                     stop = true;
                 }
             }
@@ -238,6 +240,7 @@ function updateCars(delta) {
                 signalGap <= stopLength+2.5)
             {
                 stop = true;
+                console.log("信号");
             }
                 
         }
