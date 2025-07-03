@@ -183,23 +183,26 @@ function updateCars(delta) {
             let nextTo = car.route[car.routeIndex + 2];
             let nextSection = mapList.find(s => s.from === nextFrom && s.to === nextTo);
 
+            let minGap = Infinity;
+
             for (let j = 0; j < cars.length; j++) {
                 if (j === i) continue;
                 const other = cars[j];
-                for (let k=0; k< other.routeMax +1; k++){
-                    if (
-                        other.route[k] === nextFrom &&
-                        other.route[k + 1] === nextTo
-                    ) {
-                        const distanceRemaining = distanceInSection - car.traveled;
-                        const totalGap = distanceRemaining + other.traveled;
-                        if (totalGap < stopLength+10) {
-                            console.log("次区間");
-                            stop = true;
-                            break;
-                        }
-                    }
+            
+                // other.car が次の区間を実際に走っているときだけチェック
+                const from = other.route[other.routeIndex];
+                const to = other.route[other.routeIndex + 1];
+                if (from === nextFrom && to === nextTo) {
+                    const distanceRemaining = distanceInSection - car.traveled;
+                    const totalGap = distanceRemaining + other.traveled;
+            
+                    minGap = Math.min(minGap, totalGap);
                 }
+            }
+            
+            if (minGap < stopLength + 10) {
+                console.log("次区間");
+                stop = true;
             }
         }
 
@@ -268,7 +271,7 @@ function updateCars(delta) {
 
         if (car.traveled >= distanceInSection) {
             car.routeIndex++;
-            car.traveled -=distanceInsection;
+            car.traveled -=distanceInSection;
         }
 
         // --------- ⑥ ルート終了判定 ---------
