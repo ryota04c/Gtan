@@ -353,7 +353,7 @@ function draw() {
         ctx.translate(car.x, car.y);
     
         // 回転角
-        let angle = section.direction_arg*Math.PI;
+        let angle = -section.direction_arg*Math.PI;
     
         ctx.rotate(angle);
         ctx.fillRect(-carWidth / 2, -carLength / 2, carWidth, carLength);
