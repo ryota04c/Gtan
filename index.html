@@ -82,11 +82,11 @@ fetch(PARAMS_URL)
 function spawnCar1() {
     let routeRandom = Math.random();
     let route = 
-        routeRandom < 0.05 ? ["A","B","E"]:
-        routeRandom < 0.10 ? ["A","B","F"]:
-        routeRandom < 0.15 ? ["A","B","C","G"]:
-        routeRandom < 0.20 ? ["A","B","C","H"]:
-        ["A","B","C","D"];
+        routeRandom < 0.1? ["A","B","K","L","T","j"]:
+        routeRandom < 0.20 ? ["A","B","E","e"]:
+        routeRandom < 0.28 ? ["A","B","E","F","G","H","o"]:
+        routeRandom < 0.36 ? ["A","B","E","F","G","M","N","Q","t"]:
+        ["A","B","E","F","G","H","I","J"];
     cars.push({
         x: 409,
         y: 0,
@@ -209,14 +209,14 @@ function updateCars(delta) {
         let onsig = false
         let sigInf = {};
         //来た方面に合わせた信号のnoと方向
-        if(currentFrom === "A"){
+        if(currentFrom === "B"||currentFrom === "K"){
             onsig = true;
             sigInf = {
                 no: 0,
                 shaft : 'y',
                 direction: 'top'
             };  
-        }else if(currentFrom === "B"){
+        }else if(currentFrom === "G"||currentFrom === "M"){
             onsig = true;
             sigInf = {
               no: 1,
