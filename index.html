@@ -287,6 +287,34 @@
                   shaft: 'y',
                   direction: 'bottom'
                 };
+            }}else if(currentFrom === "b"||currentFrom === "c"){
+                onsig = true;
+                sigInf = {
+                  no: 0,
+                  shaft: 'x',
+                  direction: 'left'
+                };                
+            }else if(currentFrom === "g"||currentFrom === "h"){
+                onsig = true;
+                sigInf = {
+                  no: 0,
+                  shaft: 'x',
+                  direction: 'right'
+                };
+            }else if(currentFrom === "l"||currentFrom === "m"){
+                onsig = true;
+                sigInf = {
+                  no: 1,
+                  shaft: 'x',
+                  direction: 'left'
+                };
+            }else if(currentFrom === "q"||currentFrom === "r"){
+                onsig = true;
+                sigInf = {
+                  no: 1,
+                  shaft: 'x',
+                  direction: 'right'
+                };
             }
                 
             if(onsig){
@@ -295,8 +323,14 @@
                 const sigPoint = sigShaft[sigInf.direction];
                 const carPoint = car[sigInf.shaft];
                 const signalGap = Math.abs(sigPoint-carPoint);
+                const direction_num = 
+                    sigInf.direction === "top"?1:
+                    sigInf.direction === "bottom"? -1:
+                    sigInf.direction === "left"? -1:
+                    sigInf.direction === "right"? 1:
+                    0;
                 if((signalData.state === "red" || signalData.state === "yellow") &&
-                    (sigPoint - carPoint) > 0 &&
+                    (sigPoint - carPoint)*direction_num > 0 &&
                     signalGap <= stopLength+5)
                 {
                     stop = true;
