@@ -13,367 +13,432 @@
 
     <!--描画枠の設定-->
 <script>
-//描画枠
-const canvas = document.getElementById("trafficCanvas");
-const ctx = canvas.getContext("2d");
-//パラメーター取得
-const PARAMS_URL = "https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec"; 
-    
-let settings = {};
-let cars = [];
-//信号配置
-const signals = [
-    {   
-        x:{
-            right:412,
-            left:388
-            },
-        y: {
-            top:788,
-            bottom:812
-        },
-        state: 'green', 
-        timer: 0, 
-        id: 'signal1' 
-    },
-    {   
-        x:{
-            right:412,
-            left:388
-            },
-        y: {
-            top:2788,
-            bottom:2812
-        },
-        state: 'green', 
-        timer: 0, 
-        id: 'signal2' 
-    },
-];
-
-let time = 0;
-// パラメータを取得してからシミュレーション開始
-fetch(PARAMS_URL)
-    .then(res => res.json())
-    .then(data => {
-        settings = {
-            signal1: {
-                green: parseInt(data.params.signal1_green),
-                yellow: parseInt(data.params.signal1_yellow),
-                red: parseInt(data.params.signal1_red)
-            },
-            signal2: {
-                green: parseInt(data.params.signal2_green),
-                yellow: parseInt(data.params.signal2_yellow),
-                red: parseInt(data.params.signal2_red)
-            },
-                car_spawn_rate: parseInt(data.params.car_spawn_rate),
-                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
-                car_length: parseFloat(data.params.car_length_m),
-                acceleration: parseFloat(data.params.acceleration_mps2)
-        };
-        mapList = data.map;
-
-        setInterval(spawnCar1, settings.car_spawn_rate);
-        requestAnimationFrame(loop);
-    });
-
-//車の出現
-function spawnCar1() {
-    let routeRandom = Math.random();
-    let route = 
-        routeRandom < 0.1? ["A","B","K","L","T","j"]:
-        routeRandom < 0.20 ? ["A","B","E","e"]:
-        routeRandom < 0.28 ? ["A","B","E","F","G","H","o"]:
-        routeRandom < 0.36 ? ["A","B","E","F","G","M","N","Q","t"]:
-        ["A","B","E","F","G","H","I","J"];
-    cars.push({
-        x: 409,
-        y: 0,
-        speed: settings.car_speed_max,
-        targetSpeed: settings.car_speed_max,
-        route:route,
-        routeIndex:0,
-        traveled :0 ,
-        routeMax:route.length-2 ,
-        finished : 0,
-        totalLength : 0,
-        runTime : 0,
-        crowdTime: 0,
-        crowdLength: 0,
-        feeling: 0,
-        CO2 : 0
+    //描画枠
+    const canvas = document.getElementById("trafficCanvas");
+    const ctx = canvas.getContext("2d");
+    //パラメーター取得
+    const PARAMS_URL = "https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec"; 
         
-    });
+    let settings = {};
+    let cars = [];
+    //信号配置
+    const signals = [
+        {   
+            x:{
+                right:412,
+                left:388
+                },
+            y: {
+                top:788,
+                bottom:812
+            },
+            state: 'green', 
+            timer: 0, 
+            id: 'signal1' 
+        },
+        {   
+            x:{
+                right:412,
+                left:388
+                },
+            y: {
+                top:2788,
+                bottom:2812
+            },
+            state: 'green', 
+            timer: 0, 
+            id: 'signal2' 
+        },
+    ];
     
-}
-
-//信号の更新
-function updateSignals(delta) {
-    for (let sig of signals) {//信号の数だけ繰り返す
-        sig.timer += delta;
-        const conf = settings[sig.id];//信号名に応じてJSONを取得する
-        const totalCycle = conf.green + conf.yellow + conf.red;
-        let t = sig.timer % totalCycle;//信号の動きを周期化する
+    let time = 0;
+    // パラメータを取得してからシミュレーション開始
+    fetch(PARAMS_URL)
+        .then(res => res.json())
+        .then(data => {
+            settings = {
+                signal1: {
+                    green: parseInt(data.params.signal1_green),
+                    yellow: parseInt(data.params.signal1_yellow),
+                    red: parseInt(data.params.signal1_red)
+                },
+                signal2: {
+                    green: parseInt(data.params.signal2_green),
+                    yellow: parseInt(data.params.signal2_yellow),
+                    red: parseInt(data.params.signal2_red)
+                },
+                    car_spawn_rate: parseInt(data.params.car_spawn_rate),
+                    car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
+                    car_length: parseFloat(data.params.car_length_m),
+                    acceleration: parseFloat(data.params.acceleration_mps2)
+            };
+            mapList = data.map;
     
-        if (t < conf.green) {
-             sig.state = 'green';
-        } else if (t < conf.green + conf.yellow) {
-            sig.state = 'yellow';
-        } else {
-            sig.state = 'red';
+            spawnCarFromTopLoop();
+            spawnCarFromBotttomLoop();
+            requestAnimationFrame(loop);
+        });
+    function spawnCarFromTopLoop() {
+        spawnCarFromTop();  // 車を出す
+    
+        // 次の出現までの待ち時間をランダムに決定（±30%の範囲）
+        const base = settings.car_spawn_rate;
+        const variation = base * 0.4;
+        const nextInterval = base + (Math.random() * variation * 2 - variation);
+    
+        setTimeout(spawnCarFromTopLoop, nextInterval);
+    }
+    
+    function spawnCarFromBottomLoop() {
+        spawnCarFromBottom();  // 車を出す
+    
+        const base = settings.car_spawn_rate ;
+        const variation = base * 0.4;
+        const nextInterval = base + (Math.random() * variation * 2 - variation);
+    
+        setTimeout(spawnCarFromBottomLoop, nextInterval);
+    }
+    
+    //車の出現
+    function spawnCarFromTop() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.1? ["A","B","K","L","T","j"]:
+            routeRandom < 0.20 ? ["A","B","E","e"]:
+            routeRandom < 0.28 ? ["A","B","E","F","G","H","o"]:
+            routeRandom < 0.36 ? ["A","B","E","F","G","M","N","Q","t"]:
+            ["A","B","E","F","G","H","I","J"];
+        cars.push({
+            x: 409,
+            y: 0,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+    
+    function spawnCarFromBottom() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.1? ["O","P","W","X","H","o"]:
+            routeRandom < 0.20 ? ["O","P","Q","t"]:
+            routeRandom < 0.28 ? ["O","P","Q","R","S","T","j"]:
+            routeRandom < 0.36 ? ["O","P","Q","R","S","Y","Z","E","e"]:
+            ["O","P","Q","R","S","T","U","V"];
+        cars.push({
+            x: 409,
+            y: 3600,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+    
+    //信号の更新
+    function updateSignals(delta) {
+        for (let sig of signals) {//信号の数だけ繰り返す
+            sig.timer += delta;
+            const conf = settings[sig.id];//信号名に応じてJSONを取得する
+            const totalCycle = conf.green + conf.yellow + conf.red;
+            let t = sig.timer % totalCycle;//信号の動きを周期化する
+        
+            if (t < conf.green) {
+                 sig.state = 'green';
+            } else if (t < conf.green + conf.yellow) {
+                sig.state = 'yellow';
+            } else {
+                sig.state = 'red';
+            }
         }
     }
-}
-
-//車の更新
-function updateCars(delta) {
-    const carWidth = settings.car_length;
-    const carLength = 4;
-    for (let i = 0 ; i < cars.length ; i++) {
-        const car = cars[i];
-
-        // ルートが終わっているならスキップ
-        if (car.routeIndex > car.routeMax) continue;
-        
-        let stop = false;
-
-        // 区間情報取得
-        let currentFrom = car.route[car.routeIndex];
-        let currentTo = car.route[car.routeIndex + 1];
-        let section = mapList.find(s => s.from === currentFrom && s.to === currentTo);
-        if (!section) continue;
-        const distanceInSection = section.distance;
-        
-        //車の先頭の座標記録
-        const carFrontX = car.x+carWidth/2*Math.cos(section.direction_arg * Math.PI);
-        const carFrontY = car.y-carWidth/2*Math.sin(section.direction_arg * Math.PI);
-        
-        //車の停止距離を認識
-        let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
-        //高速域では速度に応じた誤差を導入
-        if(car.speed > 8.34)stopLength += car.speed*Math.random()/3;
-
-        // --------- ① 同じ区間内の前方車チェック ---------
-        let foundFrontCar = false;
-        for (let j = 0; j < cars.length; j++) {
-            if (j === i) continue;
-            const other = cars[j];
-            if (
-                other.route[other.routeIndex] === currentFrom &&
-                other.route[other.routeIndex + 1] === currentTo
-            ) {
-                let gap = other.traveled-car.traveled
-
-                if (stopLength+20 > gap && gap>0) {
-                    console.log("同区間");
-                    stop = true;
-                    foundFrontCar = true;
-                    break;
-                }
-            }
+    
+    //車の更新
+    function updateCars(delta) {
+        const carWidth = settings.car_length;
+        const carLength = 4;
+        for (let i = 0 ; i < cars.length ; i++) {
+            const car = cars[i];
+    
+            // ルートが終わっているならスキップ
+            if (car.routeIndex > car.routeMax) continue;
             
-        }
-
-        // --------- ② 次区間の前方車チェック ---------
-        if (!foundFrontCar && car.routeIndex + 2 < car.route.length) {
-            let nextFrom = car.route[car.routeIndex + 1];
-            let nextTo = car.route[car.routeIndex + 2];
-            let nextSection = mapList.find(s => s.from === nextFrom && s.to === nextTo);
-
-            let minGap = Infinity;
-
+            let stop = false;
+    
+            // 区間情報取得
+            let currentFrom = car.route[car.routeIndex];
+            let currentTo = car.route[car.routeIndex + 1];
+            let section = mapList.find(s => s.from === currentFrom && s.to === currentTo);
+            if (!section) continue;
+            const distanceInSection = section.distance;
+            
+            //車の先頭の座標記録
+            const carFrontX = car.x+carWidth/2*Math.cos(section.direction_arg * Math.PI);
+            const carFrontY = car.y-carWidth/2*Math.sin(section.direction_arg * Math.PI);
+            
+            //車の停止距離を認識
+            let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
+            //高速域では速度に応じた誤差を導入
+            if(car.speed > 8.34)stopLength += car.speed*Math.random()/3;
+    
+            // --------- ① 同じ区間内の前方車チェック ---------
+            let foundFrontCar = false;
             for (let j = 0; j < cars.length; j++) {
                 if (j === i) continue;
                 const other = cars[j];
-            
-                // other.car が次の区間を実際に走っているときだけチェック
-                if(other.route.length === other.routeIndex+1)continue;
-                const from = other.route[other.routeIndex];
-                const to = other.route[other.routeIndex + 1];
-                if (from === nextFrom && to === nextTo) {
-                    const distanceRemaining = distanceInSection - car.traveled;
-                    const totalGap = distanceRemaining + other.traveled;
-            
-                    minGap = Math.min(minGap, totalGap);
+                if (
+                    other.route[other.routeIndex] === currentFrom &&
+                    other.route[other.routeIndex + 1] === currentTo
+                ) {
+                    let gap = other.traveled-car.traveled
+    
+                    if (stopLength+20 > gap && gap>0) {
+                        console.log("同区間");
+                        stop = true;
+                        foundFrontCar = true;
+                        break;
+                    }
+                }
+                
+            }
+    
+            // --------- ② 次区間の前方車チェック ---------
+            if (!foundFrontCar && car.routeIndex + 2 < car.route.length) {
+                let nextFrom = car.route[car.routeIndex + 1];
+                let nextTo = car.route[car.routeIndex + 2];
+                let nextSection = mapList.find(s => s.from === nextFrom && s.to === nextTo);
+    
+                let minGap = Infinity;
+    
+                for (let j = 0; j < cars.length; j++) {
+                    if (j === i) continue;
+                    const other = cars[j];
+                
+                    // other.car が次の区間を実際に走っているときだけチェック
+                    if(other.route.length === other.routeIndex+1)continue;
+                    const from = other.route[other.routeIndex];
+                    const to = other.route[other.routeIndex + 1];
+                    if (from === nextFrom && to === nextTo) {
+                        const distanceRemaining = distanceInSection - car.traveled;
+                        const totalGap = distanceRemaining + other.traveled;
+                
+                        minGap = Math.min(minGap, totalGap);
+                    }
+                }
+                
+                if (minGap < stopLength + 20) {
+                    console.log("次区間");
+                    stop = true;
                 }
             }
-            
-            if (minGap < stopLength + 20) {
-                console.log("次区間");
-                stop = true;
-            }
-        }
-
-        // --------- ③ 信号による停止判定 ---------
-        let onsig = false
-        let sigInf = {};
-        //来た方面に合わせた信号のnoと方向
-        if(currentFrom === "B"||currentFrom === "K"){
-            onsig = true;
-            sigInf = {
-                no: 0,
-                shaft : 'y',
-                direction: 'top'
-            };  
-        }else if(currentFrom === "G"||currentFrom === "M"){
-            onsig = true;
-            sigInf = {
-              no: 1,
-              shaft: 'y',
-              direction: 'top'
-            }  
-        }
-        if(onsig){
-            const signalData = signals[sigInf.no];
-            const sigShaft = signalData[sigInf.shaft];
-            const sigPoint = sigShaft[sigInf.direction];
-            const carPoint = car[sigInf.shaft];
-            const signalGap = Math.abs(sigPoint-carPoint);
-            if((signalData.state === "red" || signalData.state === "yellow") &&
-                (sigPoint - carPoint) > 0 &&
-                signalGap <= stopLength+5)
-            {
-                stop = true;
-                console.log("信号");
+    
+            // --------- ③ 信号による停止判定 ---------
+            let onsig = false
+            let sigInf = {};
+            //来た方面に合わせた信号のnoと方向
+            if(currentFrom === "B"||currentFrom === "K"){
+                onsig = true;
+                sigInf = {
+                    no: 0,
+                    shaft : 'y',
+                    direction: 'top'
+                }; 
+            }else if(currentFrom === "G"||currentFrom === "M"){
+                onsig = true;
+                sigInf = {
+                  no: 1,
+                  shaft: 'y',
+                  direction: 'top'
+                };                
+            }else if(currentFrom === "P"||currentFrom === "W"){
+                onsig = true;
+                sigInf = {
+                  no: 1,
+                  shaft: 'y',
+                  direction: 'bottom'
+                };
+            }else if(currentFrom === "S"||currentFrom === "Y"){
+                onsig = true;
+                sigInf = {
+                  no: 0,
+                  shaft: 'y',
+                  direction: 'bottom'
+                };
             }
                 
+            if(onsig){
+                const signalData = signals[sigInf.no];
+                const sigShaft = signalData[sigInf.shaft];
+                const sigPoint = sigShaft[sigInf.direction];
+                const carPoint = car[sigInf.shaft];
+                const signalGap = Math.abs(sigPoint-carPoint);
+                if((signalData.state === "red" || signalData.state === "yellow") &&
+                    (sigPoint - carPoint) > 0 &&
+                    signalGap <= stopLength+5)
+                {
+                    stop = true;
+                    console.log("信号");
+                }
+                    
+            }
+    
+            // --------- ④ 加減速処理 ---------
+            if (stop) {
+                car.speed = Math.max(0, car.speed - settings.acceleration * (delta / 1000));
+            } else {
+                car.speed = Math.min(car.targetSpeed, car.speed + settings.acceleration * (delta / 1000));
+            }
+    
+            // --------- ⑤ 移動と区間更新 ---------
+            const moveDistance = car.speed * (delta / 1000);
+            const speed2 = car.speed*3.6/2;
+            car.traveled += moveDistance;
+            car.runTime += delta/1000;
+            car.totalLength += moveDistance;
+            car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
+            if(speed2 <= 15 && speed2 !== 0){
+                car.crowdTime += delta/1000;
+                car.crowdLength += moveDistance/2;
+            }else if(speed2 > 15&&car.crowdTime !== 0){
+                const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
+                const feelingNew = feelingBase* car.crowdTime;
+                car.feeling = Math.max(car.feeling,feelingNew);
+                car.crowdTime = 0;
+                car.crowdLength = 0;
+            }
+            //移動処理
+            car.x += moveDistance*Math.cos(section.direction_arg*Math.PI);
+            car.y -= moveDistance*Math.sin(section.direction_arg*Math.PI);
+    
+            if (car.traveled >= distanceInSection) {
+                car.routeIndex++;
+                car.traveled = 0;
+            }
+    
+            // --------- ⑥ ルート終了判定 ---------
+            if (car.routeIndex >= car.route.length - 1) {
+                console.log("ルート終了 → 除外:", car.route);
+                car.finish = 1;
+                sendResultToSheet(car);
+            }
         }
-
-        // --------- ④ 加減速処理 ---------
-        if (stop) {
-            car.speed = Math.max(0, car.speed - settings.acceleration * (delta / 1000));
-        } else {
-            car.speed = Math.min(car.targetSpeed, car.speed + settings.acceleration * (delta / 1000));
-        }
-
-        // --------- ⑤ 移動と区間更新 ---------
-        const moveDistance = car.speed * (delta / 1000);
-        const speed2 = car.speed*3.6/2;
-        car.traveled += moveDistance;
-        car.runTime += delta/1000;
-        car.totalLength += moveDistance;
-        car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
-        if(speed2 <= 15 && speed2 !== 0){
-            car.crowdTime += delta/1000;
-            car.crowdLength += moveDistance/2;
-        }else if(speed2 > 15&&car.crowdTime !== 0){
-            const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
-            const feelingNew = feelingBase* car.crowdTime;
-            car.feeling = Math.max(car.feeling,feelingNew);
-            car.crowdTime = 0;
-            car.crowdLength = 0;
-        }
-        //移動処理
-        car.x += moveDistance*Math.cos(section.direction_arg*Math.PI);
-        car.y -= moveDistance*Math.sin(section.direction_arg*Math.PI);
-
-        if (car.traveled >= distanceInSection) {
-            car.routeIndex++;
-            car.traveled = 0;
-        }
-
-        // --------- ⑥ ルート終了判定 ---------
-        if (car.routeIndex >= car.route.length - 1) {
-            console.log("ルート終了 → 除外:", car.route);
-            car.finish = 1;
-            sendResultToSheet(car);
-        }
+    
+        // --------- ⑦ 画面外 or 終了車両の除去 ---------
+        cars = cars.filter(car => car.finish !== 1 &&
+            car.x >= -50 && car.x <= canvas.width + 50 &&
+            car.y >= -50 && car.y <= canvas.height + 50);
     }
-
-    // --------- ⑦ 画面外 or 終了車両の除去 ---------
-    cars = cars.filter(car => car.finish !== 1 &&
-        car.x >= -50 && car.x <= canvas.width + 50 &&
-        car.y >= -50 && car.y <= canvas.height + 50);
-}
-//データ転送
-function sendResultToSheet(car) {
-  fetch("https://script.google.com/macros/s/AKfycbxF6ldhtbvAFX1fiEX_A1MvNNFt9iCTGS3-rrKuH_waXvdeVBTFbZAKWUTxOXB6Xixn/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain"  // ← ここが超重要！
-    },
-    body: JSON.stringify({
-      feeling: car.feeling,
-      runTime: car.runTime,   // ← runTime の typo 修正も！
-      totalLength: car.totalLength,
-      CO2: car.CO2
-    })
-  })
-  .then(res => res.text())
-  .then(data => console.log("送信成功:", data))
-  .catch(err => console.error("送信失敗:", err));
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 道路
-    ctx.fillStyle = "#aaa";
-    ctx.fillRect(388, 0, 24, canvas.height);
-    ctx.fillRect(0, 788, canvas.width,24);
-    ctx.fillRect(0, 2788, canvas.width,24);
-    
-    // 信号描画
-    for (let sig of signals) {
-        ctx.fillStyle = sig.state;
-        ctx.beginPath();
-        ctx.arc(sig.x.left-8, sig.y.top-8, 8, 0, Math.PI * 2);
-        ctx.fill();
+    //データ転送
+    function sendResultToSheet(car) {
+      fetch("https://script.google.com/macros/s/AKfycbxF6ldhtbvAFX1fiEX_A1MvNNFt9iCTGS3-rrKuH_waXvdeVBTFbZAKWUTxOXB6Xixn/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"  // ← ここが超重要！
+        },
+        body: JSON.stringify({
+          feeling: car.feeling,
+          runTime: car.runTime,   // ← runTime の typo 修正も！
+          totalLength: car.totalLength,
+          CO2: car.CO2
+        })
+      })
+      .then(res => res.text())
+      .then(data => console.log("送信成功:", data))
+      .catch(err => console.error("送信失敗:", err));
     }
     
-    // 車描画
-    for (let car of cars) {
-        let speedRatio = car.speed / car.targetSpeed;
-        const carWidth = settings.car_length;
-        const carLength = 4;
-    
-        // 安全に範囲内に収める
-        if (!isFinite(speedRatio) || isNaN(speedRatio)) {
-            speedRatio = 0;
-        }
-        speedRatio = Math.max(0, Math.min(1, speedRatio));
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        //色変更
-        if (car.speed === 0) {
-            ctx.fillStyle = "black"; // 停止中
-        } else {
-            let hue = 0 + (240 - 0) * speedRatio;
-            let lightness = 20 + 30 * speedRatio; // 速度ゼロ→20%、速度MAX→50%
-            ctx.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+        // 道路
+        ctx.fillStyle = "#aaa";
+        ctx.fillRect(388, 0, 24, canvas.height);
+        ctx.fillRect(0, 788, canvas.width,24);
+        ctx.fillRect(0, 2788, canvas.width,24);
+        
+        // 信号描画
+        for (let sig of signals) {
+            ctx.fillStyle = sig.state;
+            ctx.beginPath();
+            ctx.arc(sig.x.left-8, sig.y.top-8, 8, 0, Math.PI * 2);
+            ctx.fill();
         }
-        // 向きごとに描画
-        const section = mapList.find(s =>
-            s.from === car.route[car.routeIndex] &&
-            s.to === car.route[car.routeIndex + 1]
-        );
-        if (!section) continue;
+        
+        // 車描画
+        for (let car of cars) {
+            let speedRatio = car.speed / car.targetSpeed;
+            const carWidth = settings.car_length;
+            const carLength = 4;
+        
+            // 安全に範囲内に収める
+            if (!isFinite(speedRatio) || isNaN(speedRatio)) {
+                speedRatio = 0;
+            }
+            speedRatio = Math.max(0, Math.min(1, speedRatio));
+            
+            //色変更
+            if (car.speed === 0) {
+                ctx.fillStyle = "black"; // 停止中
+            } else {
+                let hue = 0 + (240 - 0) * speedRatio;
+                let lightness = 20 + 30 * speedRatio; // 速度ゼロ→20%、速度MAX→50%
+                ctx.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+            }
+            // 向きごとに描画
+            const section = mapList.find(s =>
+                s.from === car.route[car.routeIndex] &&
+                s.to === car.route[car.routeIndex + 1]
+            );
+            if (!section) continue;
+        
+            ctx.save();
+            ctx.translate(car.x, car.y);
+        
+            // 回転角
+            let angle = -section.direction_arg*Math.PI;
+        
+            ctx.rotate(angle);
+            ctx.fillRect(-carWidth / 2, -carLength / 2, carWidth, carLength);
+            ctx.restore();
+    }
     
-        ctx.save();
-        ctx.translate(car.x, car.y);
+    }
     
-        // 回転角
-        let angle = -section.direction_arg*Math.PI;
+    //経過時間の取得
+    let lastTime = performance.now();
+    //ループ処理
+    function loop(now) {
+        let delta = now - lastTime;
+        lastTime = now;
     
-        ctx.rotate(angle);
-        ctx.fillRect(-carWidth / 2, -carLength / 2, carWidth, carLength);
-        ctx.restore();
-}
-
-}
-
-//経過時間の取得
-let lastTime = performance.now();
-//ループ処理
-function loop(now) {
-    let delta = now - lastTime;
-    lastTime = now;
-
-    updateSignals(delta);
-    updateCars(delta);
-    draw();
-    requestAnimationFrame(loop);
-}
+        updateSignals(delta);
+        updateCars(delta);
+        draw();
+        requestAnimationFrame(loop);
+    }
 </script>
 </body>
 </html>
