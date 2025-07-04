@@ -73,10 +73,10 @@
                     acceleration: parseFloat(data.params.acceleration_mps2)
             };
             mapList = data.map;
-    
+
+            requestAnimationFrame(loop);
             spawnCarFromTopLoop();
             spawnCarFromBottomLoop();
-            requestAnimationFrame(loop);
         });
     function spawnCarFromTopLoop() {
         spawnCarFromTop();  // 車を出す
