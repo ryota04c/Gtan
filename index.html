@@ -228,7 +228,7 @@ function updateCars(delta) {
             const signalData = signals[sigInf.no];
             const sigShaft = signalData[sigInf.shaft];
             const sigPoint = sigShaft[sigInf.direction];
-            const carPoint = car.[sigInf.shaft];
+            const carPoint = car[sigInf.shaft];
             const signalGap = Math.abs(sigPoint-carPoint);
             if((signalData.state === "red" || signalData.state === "yellow") &&
                 (sigPoint - carPoint) > 0 &&
