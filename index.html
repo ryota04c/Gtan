@@ -9,7 +9,7 @@
 </head>
 <body>
     <!--描画枠の設定-->
-<canvas id="trafficCanvas" width="400" height="1800"></canvas>
+<canvas id="trafficCanvas" width="800" height="3600"></canvas>
 
     <!--描画枠の設定-->
 <script>
@@ -25,12 +25,12 @@ let cars = [];
 const signals = [
     {   
         x:{
-            right:206,
-            left:194
+            right:412,
+            left:388
             },
         y: {
-            top:394,
-            bottom:406
+            top:788,
+            bottom:812
         },
         state: 'green', 
         timer: 0, 
@@ -38,12 +38,12 @@ const signals = [
     },
     {   
         x:{
-            right:206,
-            left:194
+            right:412,
+            left:388
             },
         y: {
-            top:1394,
-            bottom:1406
+            top:2788,
+            bottom:2812
         },
         state: 'green', 
         timer: 0, 
@@ -88,7 +88,7 @@ function spawnCar1() {
         routeRandom < 0.20 ? ["A","B","C","H"]:
         ["A","B","C","D"];
     cars.push({
-        x: 204.5,
+        x: 409,
         y: 0,
         speed: settings.car_speed_max,
         targetSpeed: settings.car_speed_max,
@@ -129,7 +129,7 @@ function updateSignals(delta) {
 //車の更新
 function updateCars(delta) {
     const carWidth = settings.car_length;
-    const carLength = 2;
+    const carLength = 4;
     for (let i = 0 ; i < cars.length ; i++) {
         const car = cars[i];
 
@@ -152,7 +152,7 @@ function updateCars(delta) {
         //車の停止距離を認識
         let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
         //高速域では速度に応じた誤差を導入
-        if(car.speed > 4.17)stopLength += car.speed*Math.random()/4;
+        if(car.speed > 8.34)stopLength += car.speed*Math.random()/3;
 
         // --------- ① 同じ区間内の前方車チェック ---------
         let foundFrontCar = false;
@@ -165,7 +165,7 @@ function updateCars(delta) {
             ) {
                 let gap = other.traveled-car.traveled
 
-                if (stopLength+10 > gap && gap>0) {
+                if (stopLength+20 > gap && gap>0) {
                     console.log("同区間");
                     stop = true;
                     foundFrontCar = true;
@@ -199,7 +199,7 @@ function updateCars(delta) {
                 }
             }
             
-            if (minGap < stopLength + 10) {
+            if (minGap < stopLength + 20) {
                 console.log("次区間");
                 stop = true;
             }
@@ -228,11 +228,11 @@ function updateCars(delta) {
             const signalData = signals[sigInf.no];
             const sigShaft = signalData[sigInf.shaft];
             const sigPoint = sigShaft[sigInf.direction];
-            const carPoint = car.y;
+            const carPoint = car.[sigInf.shaft];
             const signalGap = Math.abs(sigPoint-carPoint);
             if((signalData.state === "red" || signalData.state === "yellow") &&
                 (sigPoint - carPoint) > 0 &&
-                signalGap <= stopLength+2.5)
+                signalGap <= stopLength+5)
             {
                 stop = true;
                 console.log("信号");
@@ -249,14 +249,14 @@ function updateCars(delta) {
 
         // --------- ⑤ 移動と区間更新 ---------
         const moveDistance = car.speed * (delta / 1000);
-        const speed2 = car.speed*3.6;
+        const speed2 = car.speed*3.6/2;
         car.traveled += moveDistance;
         car.runTime += delta/1000;
         car.totalLength += moveDistance;
-        car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/1000;
+        car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
         if(speed2 <= 15 && speed2 !== 0){
             car.crowdTime += delta/1000;
-            car.crowdLength += moveDistance;
+            car.crowdLength += moveDistance/2;
         }else if(speed2 > 15&&car.crowdTime !== 0){
             const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
             const feelingNew = feelingBase* car.crowdTime;
@@ -310,15 +310,15 @@ function draw() {
     
     // 道路
     ctx.fillStyle = "#aaa";
-    ctx.fillRect(194, 0, 12, canvas.height);
-    ctx.fillRect(0, 394, canvas.width,12);
-    ctx.fillRect(0, 1394, canvas.width,12);
+    ctx.fillRect(388, 0, 24, canvas.height);
+    ctx.fillRect(0, 788, canvas.width,24);
+    ctx.fillRect(0, 2788, canvas.width,24);
     
     // 信号描画
     for (let sig of signals) {
         ctx.fillStyle = sig.state;
         ctx.beginPath();
-        ctx.arc(sig.x.left-4, sig.y.top-4, 4, 0, Math.PI * 2);
+        ctx.arc(sig.x.left-8, sig.y.top-8, 8, 0, Math.PI * 2);
         ctx.fill();
     }
     
@@ -326,7 +326,7 @@ function draw() {
     for (let car of cars) {
         let speedRatio = car.speed / car.targetSpeed;
         const carWidth = settings.car_length;
-        const carLength = 2;
+        const carLength = 4;
     
         // 安全に範囲内に収める
         if (!isFinite(speedRatio) || isNaN(speedRatio)) {
