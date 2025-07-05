@@ -57,9 +57,9 @@
         .then(res => res.json())
         .then(data => {
             settings = {
-                car_spawn_rate_X: parseInt(data.params.car_spawn_rate_X),
-                car_spawn_rate_Y1: parseInt(data.params.car_spawn_rate_Y1),
-                car_spawn_rate_Y2: parseInt(data.params.car_spawn_rate_Y2),
+                car_spawn_rate_Y: parseInt(data.params.car_spawn_rate_Y),
+                car_spawn_rate_X1: parseInt(data.params.car_spawn_rate_X1),
+                car_spawn_rate_X2: parseInt(data.params.car_spawn_rate_X2),
                 car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
                 car_length: parseFloat(data.params.car_length_m),
                 acceleration: parseFloat(data.params.acceleration_mps2)
