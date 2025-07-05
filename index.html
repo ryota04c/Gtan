@@ -65,7 +65,7 @@
                 acceleration: parseFloat(data.params.acceleration_mps2)
             };
             mapList = data.map;
-            sigTimer = data.signal
+            sigTimer = data.signal;
 
             firstSigSet(sigTimer);
             requestAnimationFrame(loop);
@@ -78,6 +78,7 @@
         });
 
     function firstSigSet(sigTimer){
+        console.log(sigTimer);
         for(let i = 0;i<signals.length;i++){
             signals[i].timer = sigTimer[i].offset;
         }
