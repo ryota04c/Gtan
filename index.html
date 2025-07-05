@@ -691,55 +691,55 @@
         
         // 信号描画（4方向に矢印表示・状態別の色）
         for (let sig of signals) {
-			// --- 各信号の状態に応じた背景色を決定 ---
-			const getBgColor = (dir, state) => {
-				if (dir === "Y") {
-					if (state === "blueY") return "green";
-					if (state === "rightY") return "blue";
-					if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
-					return "red";
-				} else if (dir === "X") {
-					if (state === "blueX") return "green";
-					if (state === "rightX") return "blue";
-					if (state === "yellow1X" || state === "yellow2X") return "yellow";
-					return "red";
-				}
-			};
+		// --- 各信号の状態に応じた背景色を決定 ---
+		const getBgColor = (dir, state) => {
+			if (dir === "Y") {
+				if (state === "blueY") return "green";
+				if (state === "rightY") return "blue";
+				if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
+				return "red";
+			} else if (dir === "X") {
+				if (state === "blueX") return "green";
+				if (state === "rightX") return "blue";
+				if (state === "yellow1X" || state === "yellow2X") return "yellow";
+				return "red";
+			}
+		};
+	
+		// --- 矢印描画 ---
+		const drawSignal = (x, y, bgColor, angle) => {
+			// 丸背景：信号状態によって変化
+			ctx.fillStyle = bgColor;
+			ctx.beginPath();
+			ctx.arc(x, y, 10, 0, Math.PI * 2);
+			ctx.fill();
+	
+			// 矢印：常に白
+			ctx.save();
+			ctx.translate(x, y);
+			ctx.rotate(angle);
+			ctx.fillStyle = "white";  // ← 矢印の色を固定
+			ctx.beginPath();
+			ctx.moveTo(-4, -3);
+			ctx.lineTo(4, 0);
+			ctx.lineTo(-4, 3);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
+		};
+	
+		// 左（X方向→右向き）
+		drawSignal(sig.x.left - 16, sig.y.top - 8, getBgColor("X", sig.state), 0);
 		
-			// --- 矢印描画 ---
-			const drawSignal = (x, y, bgColor, angle) => {
-				// 丸背景：信号状態によって変化
-				ctx.fillStyle = bgColor;
-				ctx.beginPath();
-				ctx.arc(x, y, 10, 0, Math.PI * 2);
-				ctx.fill();
+		// 上（Y方向→下向き）
+		drawSignal(sig.x.right + 8, sig.y.top - 16, getBgColor("Y", sig.state), Math.PI / 2);
 		
-				// 矢印：常に白
-				ctx.save();
-				ctx.translate(x, y);
-				ctx.rotate(angle);
-				ctx.fillStyle = "white";  // ← 矢印の色を固定
-				ctx.beginPath();
-				ctx.moveTo(-4, -3);
-				ctx.lineTo(4, 0);
-				ctx.lineTo(-4, 3);
-				ctx.closePath();
-				ctx.fill();
-				ctx.restore();
-			};
+		// 右（X方向→左向き）
+		drawSignal(sig.x.right + 16, sig.y.bottom + 8, getBgColor("X", sig.state), Math.PI);
 		
-			// 左（X方向→右向き）
-			drawSignal(sig.x.left - 16, sig.y.top - 8, getBgColor("X", sig.state), 0);
-			
-			// 上（Y方向→下向き）
-			drawSignal(sig.x.right + 8, sig.y.top - 16, getBgColor("Y", sig.state), Math.PI / 2);
-			
-			// 右（X方向→左向き）
-			drawSignal(sig.x.right + 16, sig.y.bottom + 8, getBgColor("X", sig.state), Math.PI);
-			
-			// 下（Y方向→上向き）
-			drawSignal(sig.x.left - 8, sig.y.bottom + 16, getBgColor("Y", sig.state), -Math.PI / 2);
-		}
+		// 下（Y方向→上向き）
+		drawSignal(sig.x.left - 8, sig.y.bottom + 16, getBgColor("Y", sig.state), -Math.PI / 2);
+	}
 
 
         
