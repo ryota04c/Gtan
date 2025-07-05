@@ -32,9 +32,9 @@
                 top:788,
                 bottom:812
             },
-            state: 'green', 
+            state: 'blueY', 
             timer: 0, 
-            id: 'signal1' 
+            id: 0
         },
         {   
             x:{
@@ -45,9 +45,9 @@
                 top:2788,
                 bottom:2812
             },
-            state: 'green', 
+            state: 'blueY', 
             timer: 0, 
-            id: 'signal2' 
+            id: 1
         },
     ];
     
@@ -57,34 +57,43 @@
         .then(res => res.json())
         .then(data => {
             settings = {
-                signal1: {
-                    green: parseInt(data.params.signal1_green),
-                    yellow: parseInt(data.params.signal1_yellow),
-                    red: parseInt(data.params.signal1_red)
-                },
-                signal2: {
-                    green: parseInt(data.params.signal2_green),
-                    yellow: parseInt(data.params.signal2_yellow),
-                    red: parseInt(data.params.signal2_red)
-                },
-                    car_spawn_rate: parseInt(data.params.car_spawn_rate),
-                    car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
-                    car_length: parseFloat(data.params.car_length_m),
-                    acceleration: parseFloat(data.params.acceleration_mps2)
+                car_spawn_rate_X: parseInt(data.params.car_spawn_rate_X),
+                car_spawn_rate_Y1: parseInt(data.params.car_spawn_rate_Y1),
+                car_spawn_rate_Y2: parseInt(data.params.car_spawn_rate_Y2),
+                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
+                car_length: parseFloat(data.params.car_length_m),
+                acceleration: parseFloat(data.params.acceleration_mps2)
             };
             mapList = data.map;
+            sigTimer = data.signal
 
+            firstSigSet(sigTimer);
             requestAnimationFrame(loop);
             spawnCarFromTopLoop();
             spawnCarFromBottomLoop();
         });
+
+    function firstsigSet(sigTimer){
+        for(let i = 0,i<signals.length,i++){
+            signals[i].timer = sigTimer[i].offset;
+        }
+    }
+    // 平均 mean, 標準偏差 stddev に従う正規分布の乱数を返す
+    function gaussianRandom(mean = 0, stddev = 1) {
+        let u1 = Math.random();
+        let u2 = Math.random();
+    
+        // Box-Muller変換
+        let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+        return z0 * stddev + mean;
+    }
+    
     function spawnCarFromTopLoop() {
         spawnCarFromTop();  // 車を出す
     
-        // 次の出現までの待ち時間をランダムに決定（±30%の範囲）
-        const base = settings.car_spawn_rate;
-        const variation = base * 0.4;
-        const nextInterval = base + (Math.random() * variation * 2 - variation);
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X, settings.car_spawn_rate_X * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X * 0.6, nextInterval);
     
         setTimeout(spawnCarFromTopLoop, nextInterval);
     }
@@ -92,9 +101,9 @@
     function spawnCarFromBottomLoop() {
         spawnCarFromBottom();  // 車を出す
     
-        const base = settings.car_spawn_rate ;
-        const variation = base * 0.4;
-        const nextInterval = base + (Math.random() * variation * 2 - variation);
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X, settings.car_spawn_rate_X * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X * 0.6, nextInterval);
     
         setTimeout(spawnCarFromBottomLoop, nextInterval);
     }
@@ -162,17 +171,33 @@
     function updateSignals(delta) {
         for (let sig of signals) {//信号の数だけ繰り返す
             sig.timer += delta;
-            const conf = settings[sig.id];//信号名に応じてJSONを取得する
-            const totalCycle = conf.green + conf.yellow + conf.red;
+            const conf = sigTimer[sig.id];//信号名に応じてJSONを取得する
+            const totalCycle = conf.totalTime;
             let t = sig.timer % totalCycle;//信号の動きを周期化する
-        
-            if (t < conf.green) {
-                 sig.state = 'green';
-            } else if (t < conf.green + conf.yellow) {
-                sig.state = 'yellow';
-            } else {
-                sig.state = 'red';
+            
+            const phases = [
+              { name: "blueX",     time: conf.blueX },
+              { name: "yellow1X",  time: conf.yellow1X },
+              { name: "rightX",    time: conf.rightX },
+              { name: "yellow2X",  time: conf.yellow2X },
+              { name: "red",       time: conf.redX },
+              { name: "blueY",     time: conf.blueY },
+              { name: "yellow1Y",  time: conf.yellow1Y },
+              { name: "rightY",    time: conf.rightY },
+              { name: "yellow2Y",  time: conf.yellow2Y },
+              { name: "red",       time: conf.redY }
+            ];
+            
+            // t の位置に応じて状態を設定
+            let elapsed = 0;
+            for (let phase of phases) {
+              if (t < elapsed + phase.time) {
+                sig.state = phase.name;
+                break;
+              }
+              elapsed += phase.time;
             }
+
         }
     }
     
@@ -259,62 +284,134 @@
             let onsig = false
             let sigInf = {};
             //来た方面に合わせた信号のnoと方向
-            if(currentFrom === "B"||currentFrom === "K"){
+            if(currentFrom === "B"){
                 onsig = true;
                 sigInf = {
                     no: 0,
+                    next: "str",
                     shaft : 'y',
                     direction: 'top'
                 }; 
-            }else if(currentFrom === "G"||currentFrom === "M"){
+            }else if(currentFrom === "K"){
                 onsig = true;
                 sigInf = {
-                  no: 1,
-                  shaft: 'y',
-                  direction: 'top'
-                };                
-            }else if(currentFrom === "P"||currentFrom === "W"){
+                    no: 0,
+                    next: "right",
+                    shaft : 'y',
+                    direction: 'top'
+                }; 
+            }else if(currentFrom === "G"){
                 onsig = true;
                 sigInf = {
-                  no: 1,
-                  shaft: 'y',
-                  direction: 'bottom'
-                };
-            }else if(currentFrom === "S"||currentFrom === "Y"){
+                    no: 1,
+                    next: "str",
+                    shaft : 'y',
+                    direction: 'top'
+                }; 
+            }else if(currentFrom === "M"){
                 onsig = true;
                 sigInf = {
-                  no: 0,
-                  shaft: 'y',
-                  direction: 'bottom'
-                };
-            }else if(currentFrom === "b"||currentFrom === "c"){
+                    no: 1,
+                    next: "right",
+                    shaft : 'y',
+                    direction: 'top'
+                }; 
+            }else if(currentFrom === "P"){
                 onsig = true;
                 sigInf = {
-                  no: 0,
-                  shaft: 'x',
-                  direction: 'left'
-                };                
-            }else if(currentFrom === "g"||currentFrom === "h"){
+                    no: 1,
+                    next: "str",
+                    shaft : 'y',
+                    direction: 'bottom'
+                }; 
+            }else if(currentFrom === "W"){
                 onsig = true;
                 sigInf = {
-                  no: 0,
-                  shaft: 'x',
-                  direction: 'right'
-                };
-            }else if(currentFrom === "l"||currentFrom === "m"){
+                    no: 1,
+                    next: "right",
+                    shaft : 'y',
+                    direction: 'bottom'
+                }; 
+            }else if(currentFrom === "S"){
                 onsig = true;
                 sigInf = {
-                  no: 1,
-                  shaft: 'x',
-                  direction: 'left'
-                };
-            }else if(currentFrom === "q"||currentFrom === "r"){
+                    no: 0,
+                    next: "str",
+                    shaft : 'y',
+                    direction: 'bottom'
+                }; 
+            }else if(currentFrom === "Y"){
                 onsig = true;
                 sigInf = {
-                  no: 1,
-                  shaft: 'x',
-                  direction: 'right'
-                };
+                    no: 0,
+                    next: "right",
+                    shaft : 'y',
+                    direction: 'bottom'
+                }; 
+            }else if(currentFrom === "b"){
+                onsig = true;
+                sigInf = {
+                    no: 0,
+                    next: "str",
+                    shaft : 'x',
+                    direction: 'left'
+                }; 
+            }else if(currentFrom === "c"){
+                onsig = true;
+                sigInf = {
+                    no: 0,
+                    next: "right",
+                    shaft : 'x',
+                    direction: 'left'
+                }; 
+            }else if(currentFrom === "g"){
+                onsig = true;
+                sigInf = {
+                    no: 0,
+                    next: "str",
+                    shaft : 'x',
+                    direction: 'right'
+                }; 
+            }else if(currentFrom === "h"){
+                onsig = true;
+                sigInf = {
+                    no: 0,
+                    next: "right",
+                    shaft : 'x',
+                    direction: 'right'
+                }; 
+            }else if(currentFrom === "l"){
+                onsig = true;
+                sigInf = {
+                    no: 1,
+                    next: "str",
+                    shaft : 'x',
+                    direction: 'left'
+                }; 
+            }else if(currentFrom === "m"){
+                onsig = true;
+                sigInf = {
+                    no: 1,
+                    next: "right",
+                    shaft : 'x',
+                    direction: 'left'
+                }; 
+            }else if(currentFrom === "q"){
+                onsig = true;
+                sigInf = {
+                    no:1,
+                    next: "str",
+                    shaft : 'x',
+                    direction: 'right'
+                }; 
+            }else if(currentFrom === "r"){
+                onsig = true;
+                sigInf = {
+                    no: 1,
+                    next: "right",
+                    shaft : 'x',
+                    direction: 'right'
+                }; 
             }
                 
             if(onsig){
@@ -329,12 +426,25 @@
                     sigInf.direction === "left"? -1:
                     sigInf.direction === "right"? 1:
                     0;
-                if((signalData.state === "red" || signalData.state === "yellow") &&
+                if(
+                    (
+                        (signalData.state !== "blueX" && 
+                       sigInf.shaft ==="x"&&
+                       sigInf.next === "str")||
+                        (signalData.state !== "rightX" && 
+                       sigInf.shaft ==="x"&&
+                       sigInf.next === "right")||
+                        (signalData.state !== "blueY" && 
+                       sigInf.shaft ==="y"&&
+                       sigInf.next === "str")||
+                        (signalData.state !== "rightY" && 
+                       sigInf.shaft ==="y"&&
+                       sigInf.next === "right")
+                   )&&
                     (sigPoint - carPoint)*direction_num > 0 &&
                     signalGap <= stopLength+5)
                 {
                     stop = true;
-                    console.log("信号");
                 }
                     
             }
@@ -352,17 +462,24 @@
             car.traveled += moveDistance;
             car.runTime += delta/1000;
             car.totalLength += moveDistance;
-            car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
-            if(speed2 <= 15 && speed2 !== 0){
-                car.crowdTime += delta/1000;
-                car.crowdLength += moveDistance/2;
-            }else if(speed2 > 15&&car.crowdTime !== 0){
-                const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
-                const feelingNew = feelingBase* car.crowdTime;
-                car.feeling = Math.max(car.feeling,feelingNew);
-                car.crowdTime = 0;
-                car.crowdLength = 0;
-            }
+            //mtz担当部
+                car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
+                if(speed2 <= 15 && speed2 !== 0){
+                    car.crowdTime += delta/1000;
+                    car.crowdLength += moveDistance/2;
+                }else if(speed2 > 15&&car.crowdTime !== 0){
+                    const feelingBase = 15-(car.crowdLength/car.crowdTime * 3.6);
+                    const feelingNew = feelingBase* car.crowdTime;
+                    car.feeling = Math.max(car.feeling,feelingNew);
+                    car.crowdTime = 0;
+                    car.crowdLength = 0;
+                }
+            //ここまで
+            /*説明
+            *moveDistanceは「２」で１ｍを表している
+            *speed2は[km/h]の単位系になっている
+            *deltaは[ms](千分の１秒)の単位系になっている
+            */
             //移動処理
             car.x += moveDistance*Math.cos(section.direction_arg*Math.PI);
             car.y -= moveDistance*Math.sin(section.direction_arg*Math.PI);
@@ -413,13 +530,58 @@
         ctx.fillRect(0, 788, canvas.width,24);
         ctx.fillRect(0, 2788, canvas.width,24);
         
-        // 信号描画
+        // 信号描画（4方向に矢印表示・状態別の色）
         for (let sig of signals) {
-            ctx.fillStyle = sig.state;
-            ctx.beginPath();
-            ctx.arc(sig.x.left-8, sig.y.top-8, 8, 0, Math.PI * 2);
-            ctx.fill();
+            // --- 各信号の状態に応じた色を決定する関数 ---
+            const getColor = (dir, state) => {
+                if (dir === "Y") {
+                    if (state === "blueY") return "green";
+                    if (state === "rightY") return "blue";
+                    if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
+                    return "red";
+                } else if (dir === "X") {
+                    if (state === "blueX") return "green";
+                    if (state === "rightX") return "blue";
+                    if (state === "yellow1X" || state === "yellow2X") return "yellow";
+                    return "red";
+                }
+            };
+        
+            // --- 各方向の信号（丸＋矢印）を描画 ---
+            const drawSignal = (x, y, color, angle) => {
+                // 丸背景
+                ctx.fillStyle = "#333";
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.fill();
+        
+                // 矢印
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);  // 向きを回転
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(-4, -3);
+                ctx.lineTo(4, 0);
+                ctx.lineTo(-4, 3);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            };
+        
+            // 左（X方向→右向き）
+            drawSignal(sig.x.left - 16, sig.y.top - 8, getColor("X", sig.state), 0);
+            
+            // 上（Y方向→下向き）
+            drawSignal(sig.x.right + 8, sig.y.top - 16, getColor("Y", sig.state), Math.PI / 2);
+            
+            // 右（X方向→左向き）
+            drawSignal(sig.x.right + 16, sig.y.bottom + 8, getColor("X", sig.state), Math.PI);
+            
+            // 下（Y方向→上向き）
+            drawSignal(sig.x.left - 8, sig.y.bottom + 16, getColor("Y", sig.state), -Math.PI / 2);
         }
+
         
         // 車描画
         for (let car of cars) {
