@@ -67,7 +67,7 @@
             mapList = data.map;
             sigTimer = data.signal;
 
-            firstSigSet(sigTimer);
+            firstSigSet();
             requestAnimationFrame(loop);
             spawnCarFromTopLoop();
             spawnCarFromBottomLoop();
@@ -77,7 +77,7 @@
             spawnCarFromRight2Loop();
         });
 
-    function firstSigSet(sigTimer){
+    function firstSigSet(){
         console.log(sigTimer);
         for(let i = 0;i<signals.length;i++){
             signals[i].timer = sigTimer[i].offset;
