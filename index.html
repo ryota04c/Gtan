@@ -335,16 +335,16 @@
             let t = sig.timer % totalCycle;//信号の動きを周期化する
             
             const phases = [
-              { name: "blueX",     time: conf.blueX },
-              { name: "yellow1X",  time: conf.yellow1X },
-              { name: "rightX",    time: conf.rightX },
-              { name: "yellow2X",  time: conf.yellow2X },
-              { name: "red",       time: conf.redX },
-              { name: "blueY",     time: conf.blueY },
-              { name: "yellow1Y",  time: conf.yellow1Y },
-              { name: "rightY",    time: conf.rightY },
-              { name: "yellow2Y",  time: conf.yellow2Y },
-              { name: "red",       time: conf.redY }
+                { name: "blueY",     time: conf.blueY },
+                { name: "yellow1Y",  time: conf.yellow1Y },
+                { name: "rightY",    time: conf.rightY },
+                { name: "yellow2Y",  time: conf.yellow2Y },
+                { name: "red",       time: conf.redY },
+                { name: "blueX",     time: conf.blueX },
+                { name: "yellow1X",  time: conf.yellow1X },
+                { name: "rightX",    time: conf.rightX },
+              	{ name: "yellow2X",  time: conf.yellow2X },
+              	{ name: "red",       time: conf.redX },
             ];
             
             // t の位置に応じて状態を設定
@@ -691,55 +691,56 @@
         
         // 信号描画（4方向に矢印表示・状態別の色）
         for (let sig of signals) {
-            // --- 各信号の状態に応じた色を決定する関数 ---
-            const getColor = (dir, state) => {
-                if (dir === "Y") {
-                    if (state === "blueY") return "green";
-                    if (state === "rightY") return "blue";
-                    if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
-                    return "red";
-                } else if (dir === "X") {
-                    if (state === "blueX") return "green";
-                    if (state === "rightX") return "blue";
-                    if (state === "yellow1X" || state === "yellow2X") return "yellow";
-                    return "red";
-                }
-            };
-        
-            // --- 各方向の信号（丸＋矢印）を描画 ---
-            const drawSignal = (x, y, color, angle) => {
-                // 丸背景
-                ctx.fillStyle = "#333";
-                ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
-                ctx.fill();
-        
-                // 矢印
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(angle);  // 向きを回転
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.moveTo(-4, -3);
-                ctx.lineTo(4, 0);
-                ctx.lineTo(-4, 3);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            };
-        
-            // 左（X方向→右向き）
-            drawSignal(sig.x.left - 16, sig.y.top - 8, getColor("X", sig.state), 0);
-            
-            // 上（Y方向→下向き）
-            drawSignal(sig.x.right + 8, sig.y.top - 16, getColor("Y", sig.state), Math.PI / 2);
-            
-            // 右（X方向→左向き）
-            drawSignal(sig.x.right + 16, sig.y.bottom + 8, getColor("X", sig.state), Math.PI);
-            
-            // 下（Y方向→上向き）
-            drawSignal(sig.x.left - 8, sig.y.bottom + 16, getColor("Y", sig.state), -Math.PI / 2);
-        }
+			// --- 各信号の状態に応じた背景色を決定 ---
+			const getBgColor = (dir, state) => {
+				if (dir === "Y") {
+					if (state === "blueY") return "green";
+					if (state === "rightY") return "blue";
+					if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
+					return "red";
+				} else if (dir === "X") {
+					if (state === "blueX") return "green";
+					if (state === "rightX") return "blue";
+					if (state === "yellow1X" || state === "yellow2X") return "yellow";
+					return "red";
+				}
+			};
+		
+			// --- 矢印描画 ---
+			const drawSignal = (x, y, bgColor, angle) => {
+				// 丸背景：信号状態によって変化
+				ctx.fillStyle = bgColor;
+				ctx.beginPath();
+				ctx.arc(x, y, 10, 0, Math.PI * 2);
+				ctx.fill();
+		
+				// 矢印：常に白
+				ctx.save();
+				ctx.translate(x, y);
+				ctx.rotate(angle);
+				ctx.fillStyle = "white";  // ← 矢印の色を固定
+				ctx.beginPath();
+				ctx.moveTo(-4, -3);
+				ctx.lineTo(4, 0);
+				ctx.lineTo(-4, 3);
+				ctx.closePath();
+				ctx.fill();
+				ctx.restore();
+			};
+		
+			// 左（X方向→右向き）
+			drawSignal(sig.x.left - 16, sig.y.top - 8, getBgColor("X", sig.state), 0);
+			
+			// 上（Y方向→下向き）
+			drawSignal(sig.x.right + 8, sig.y.top - 16, getBgColor("Y", sig.state), Math.PI / 2);
+			
+			// 右（X方向→左向き）
+			drawSignal(sig.x.right + 16, sig.y.bottom + 8, getBgColor("X", sig.state), Math.PI);
+			
+			// 下（Y方向→上向き）
+			drawSignal(sig.x.left - 8, sig.y.bottom + 16, getBgColor("Y", sig.state), -Math.PI / 2);
+		}
+
 
         
         // 車描画
