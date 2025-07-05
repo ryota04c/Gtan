@@ -277,8 +277,8 @@
             routeRandom < 0.60 ? ["k","l","m","n","I","J"]:
             ["k","l","R","H","o"];
         cars.push({
-            x: 800,
-            y: 2809,
+            x: 0,
+            y: 2791,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
@@ -582,8 +582,8 @@
                 const direction_num = 
                     sigInf.direction === "top"?1:
                     sigInf.direction === "bottom"? -1:
-                    sigInf.direction === "left"? -1:
-                    sigInf.direction === "right"? 1:
+                    sigInf.direction === "left"? 1:
+                    sigInf.direction === "right"? -1:
                     0;
                 if(
                     (
