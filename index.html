@@ -71,6 +71,10 @@
             requestAnimationFrame(loop);
             spawnCarFromTopLoop();
             spawnCarFromBottomLoop();
+            spawnCarFromLeft1Loop();
+            spawnCarFromRight1Loop();
+            spawnCarFromLeft2Loop();
+            spawnCarFromRight2Loop();
         });
 
     function firstsigSet(sigTimer){
@@ -92,8 +96,8 @@
         spawnCarFromTop();  // 車を出す
     
         // 次の出現までの待ち時間をランダムに決定
-        let nextInterval = gaussianRandom(settings.car_spawn_rate_X, settings.car_spawn_rate_X * 0.2);
-        nextInterval = Math.max(settings.car_spawn_rate_X * 0.6, nextInterval);
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_Y, settings.car_spawn_rate_Y * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_Y * 0.6, nextInterval);
     
         setTimeout(spawnCarFromTopLoop, nextInterval);
     }
@@ -102,10 +106,49 @@
         spawnCarFromBottom();  // 車を出す
     
         // 次の出現までの待ち時間をランダムに決定
-        let nextInterval = gaussianRandom(settings.car_spawn_rate_X, settings.car_spawn_rate_X * 0.2);
-        nextInterval = Math.max(settings.car_spawn_rate_X * 0.6, nextInterval);
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_Y, settings.car_spawn_rate_Y * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_Y * 0.6, nextInterval);
     
         setTimeout(spawnCarFromBottomLoop, nextInterval);
+    }
+
+    function spawnCarFromLeft1Loop() {
+        spawnCarFromLeft1();  // 車を出す
+    
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X1, settings.car_spawn_rate_X1 * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X1 * 0.6, nextInterval);
+    
+        setTimeout(spawnCarFromLeft1Loop, nextInterval);
+    }
+
+    function spawnCarFromRight1Loop() {
+        spawnCarFromRight1();  // 車を出す
+    
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X1, settings.car_spawn_rate_X1 * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X1* 0.6, nextInterval);
+    
+        setTimeout(spawnCarFromRight1Loop, nextInterval);
+    }
+    function spawnCarFromLeft2Loop() {
+        spawnCarFromLeft2();  // 車を出す
+    
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X2, settings.car_spawn_rate_X2 * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X2* 0.6, nextInterval);
+    
+        setTimeout(spawnCarFromLeft2Loop, nextInterval);
+    }
+
+    function spawnCarFromRight2Loop() {
+        spawnCarFromRight2();  // 車を出す
+    
+        // 次の出現までの待ち時間をランダムに決定
+        let nextInterval = gaussianRandom(settings.car_spawn_rate_X2, settings.car_spawn_rate_X2 * 0.2);
+        nextInterval = Math.max(settings.car_spawn_rate_X2* 0.6, nextInterval);
+    
+        setTimeout(spawnCarFromRight2Loop, nextInterval);
     }
     
     //車の出現
@@ -149,6 +192,121 @@
         cars.push({
             x: 391,
             y: 3600,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+
+    function spawnCarFromLeft1() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.03? ["a","b","c","d","F","G","H","o"]:
+            routeRandom < 0.27 ? ["a","b","c","d","F","G","H","I","J"]:
+            routeRandom < 0.30 ? ["a","b","c","d","F","G","M","N","Q","t"]:
+            routeRandom < 0.60 ? ["a","b","U","V"]:
+            ["a","b","U","E","e"];
+        cars.push({
+            x: 0,
+            y: 791,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+    function spawnCarFromRight1() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.03? ["f","g","F","G","H","o"]:
+            routeRandom < 0.27 ? ["f","g","F","G","H","I","J"]:
+            routeRandom < 0.30 ? ["f","g","F","G","M","N","Q","t"]:
+            routeRandom < 0.60 ? ["f","g","h","i","U","V"]:
+            ["f","g","F","T","j"];
+        cars.push({
+            x: 800,
+            y: 809,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+    
+    function spawnCarFromLeft2() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.03? ["k","l","R","S","T","j"]:
+            routeRandom < 0.27 ? ["k","l","R","S","T","U","V"]:
+            routeRandom < 0.30 ? ["k","l","R","S","Y","Z","E","e"]:
+            routeRandom < 0.60 ? ["k","l","m","n","I","J"]:
+            ["k","l","R","H","o"];
+        cars.push({
+            x: 800,
+            y: 2809,
+            speed: settings.car_speed_max,
+            targetSpeed: settings.car_speed_max,
+            route:route,
+            routeIndex:0,
+            traveled :0 ,
+            routeMax:route.length-2 ,
+            finished : 0,
+            totalLength : 0,
+            runTime : 0,
+            crowdTime: 0,
+            crowdLength: 0,
+            feeling: 0,
+            CO2 : 0
+            
+        });
+        
+    }
+    
+    function spawnCarFromRight2() {
+        let routeRandom = Math.random();
+        let route = 
+            routeRandom < 0.03? ["p","q","r","s","R","S","T","j"]:
+            routeRandom < 0.27 ? ["p","q","r","s","R","S","T","U","V"]:
+            routeRandom < 0.30 ? ["p","q","r","s","R","S","Y","Z","E","e"]:
+            routeRandom < 0.60 ? ["p","q","I","J"]:
+            ["p","q","I","Q","t"];
+        cars.push({
+            x: 800,
+            y: 2809,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
