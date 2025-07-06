@@ -386,7 +386,7 @@
             //車の停止距離を認識
             let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
             //高速域では速度に応じた誤差を導入
-            if(car.speed > 8.34)stopLength += car.speed*Math.random()/3;
+            if(car.speed > car_speed_max*0.3)stopLength += car.speed*Math.random()/3;
     
             // --------- ① 同じ区間内の前方車チェック ---------
             let foundFrontCar = false;
@@ -440,173 +440,87 @@
             }
     
             // --------- ③ 信号による停止判定 ---------
-            let onsig = false
-            let sigInf = {};
-            //来た方面に合わせた信号のnoと方向
-            if(currentFrom === "B"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "str",
-                    shaft : 'y',
-                    direction: 'top'
-                }; 
-            }else if(currentFrom === "K"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "right",
-                    shaft : 'y',
-                    direction: 'top'
-                }; 
-            }else if(currentFrom === "G"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "str",
-                    shaft : 'y',
-                    direction: 'top'
-                }; 
-            }else if(currentFrom === "M"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "right",
-                    shaft : 'y',
-                    direction: 'top'
-                }; 
-            }else if(currentFrom === "P"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "str",
-                    shaft : 'y',
-                    direction: 'bottom'
-                }; 
-            }else if(currentFrom === "W"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "right",
-                    shaft : 'y',
-                    direction: 'bottom'
-                }; 
-            }else if(currentFrom === "S"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "str",
-                    shaft : 'y',
-                    direction: 'bottom'
-                }; 
-            }else if(currentFrom === "Y"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "right",
-                    shaft : 'y',
-                    direction: 'bottom'
-                }; 
-            }else if(currentFrom === "b"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "str",
-                    shaft : 'x',
-                    direction: 'left'
-                }; 
-            }else if(currentFrom === "c"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "right",
-                    shaft : 'x',
-                    direction: 'left'
-                }; 
-            }else if(currentFrom === "g"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "str",
-                    shaft : 'x',
-                    direction: 'right'
-                }; 
-            }else if(currentFrom === "h"){
-                onsig = true;
-                sigInf = {
-                    no: 0,
-                    next: "right",
-                    shaft : 'x',
-                    direction: 'right'
-                }; 
-            }else if(currentFrom === "l"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "str",
-                    shaft : 'x',
-                    direction: 'left'
-                }; 
-            }else if(currentFrom === "m"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "right",
-                    shaft : 'x',
-                    direction: 'left'
-                }; 
-            }else if(currentFrom === "q"){
-                onsig = true;
-                sigInf = {
-                    no:1,
-                    next: "str",
-                    shaft : 'x',
-                    direction: 'right'
-                }; 
-            }else if(currentFrom === "r"){
-                onsig = true;
-                sigInf = {
-                    no: 1,
-                    next: "right",
-                    shaft : 'x',
-                    direction: 'right'
-                }; 
-            }
-                
-            if(onsig){
-                const signalData = signals[sigInf.no];
-                const sigShaft = signalData[sigInf.shaft];
-                const sigPoint = sigShaft[sigInf.direction];
-                const carPoint = car[sigInf.shaft];
-                const signalGap = Math.abs(sigPoint-carPoint);
-                const direction_num = 
-                    sigInf.direction === "top"?1:
-                    sigInf.direction === "bottom"? -1:
-                    sigInf.direction === "left"? 1:
-                    sigInf.direction === "right"? -1:
-                    0;
-                if(
-                    (
-                        (signalData.state !== "blueX" && 
-                       sigInf.shaft ==="x"&&
-                       sigInf.next === "str")||
-                        (signalData.state !== "rightX" && 
-                       sigInf.shaft ==="x"&&
-                       sigInf.next === "right")||
-                        (signalData.state !== "blueY" && 
-                       sigInf.shaft ==="y"&&
-                       sigInf.next === "str")||
-                        (signalData.state !== "rightY" && 
-                       sigInf.shaft ==="y"&&
-                       sigInf.next === "right")
-                   )&&
-                    (sigPoint - carPoint)*direction_num > 0 &&
-                    signalGap <= stopLength+5)
-                {
-                    stop = true;
-                }
-                    
-            }
+            // --- currentFrom に対応する信号情報をマッピング ---
+			const fromToSignalMap = {
+				"B": { no: 0, next: "str", shaft: "y", direction: "top" },
+				"K": { no: 0, next: "right", shaft: "y", direction: "top" ,oppositFrom: "S",oppositTo:"T"},
+				"G": { no: 1, next: "str", shaft: "y", direction: "top" },
+				"M": { no: 1, next: "right", shaft: "y", direction: "top",oppositFrom: "P",oppositTo:"Q" },
+				"P": { no: 1, next: "str", shaft: "y", direction: "bottom" },
+				"W": { no: 1, next: "right", shaft: "y", direction: "bottom",oppositFrom: "G",oppositTo:"H"},
+				"S": { no: 0, next: "str", shaft: "y", direction: "bottom" },
+				"Y": { no: 0, next: "right", shaft: "y", direction: "bottom",oppositFrom: "B",oppositTo:"E" },
+				"b": { no: 0, next: "str", shaft: "x", direction: "left" },
+				"c": { no: 0, next: "right", shaft: "x", direction: "left",oppositFrom: "g",oppositTo:"F"},
+				"g": { no: 0, next: "str", shaft: "x", direction: "right" },
+				"h": { no: 0, next: "right", shaft: "x", direction: "right",oppositFrom: "b",oppositTo:"U" },
+				"l": { no: 1, next: "str", shaft: "x", direction: "left" },
+				"m": { no: 1, next: "right", shaft: "x", direction: "left",oppositFrom: "q",oppositTo:"I" },
+				"q": { no: 1, next: "str", shaft: "x", direction: "right" },
+				"r": { no: 1, next: "right", shaft: "x", direction: "right",oppositFrom: "l",oppositTo:"R"  }
+			};
+			
+			// --- 該当する信号設定を取得 ---
+			const sigInf = fromToSignalMap[currentFrom];
+			if (sigInf) {
+				const signalData = signals[sigInf.no];
+				const sigShaft = signalData[sigInf.shaft];
+				const sigPoint = sigShaft[sigInf.direction];
+				const carPoint = car[sigInf.shaft];
+				const signalGap = Math.abs(sigPoint - carPoint);
+			
+				const direction_num = {
+				top: 1,
+				bottom: -1,
+				left: 1,
+				right: -1
+				}[sigInf.direction] || 0;
+			
+				let shouldStop =
+				(
+					(sigInf.shaft === "x" && sigInf.next === "str" && signalData.state !== "blueX") ||
+					(sigInf.shaft === "x" && sigInf.next === "right" && signalData.state !== "rightX") ||
+					(sigInf.shaft === "y" && sigInf.next === "str" && signalData.state !== "blueY") ||
+					(sigInf.shaft === "y" && sigInf.next === "right" && signalData.state !== "rightY")
+				) &&
+				(sigPoint - carPoint) * direction_num > 0 &&
+				signalGap <= stopLength + 5;
+
+				if(sigInf.next === "right"&&shoudStop&&
+				   (
+					(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
+					(sigInf.shaft === "y" &&(signalData.state === "blueY" || signalData.state === "yellow1Y"))
+				   )
+				  ){
+					shouldStop = false;
+					const leaveLen =(sigPoint - carPoint) * direction_num;
+					let leaveTime = 3;
+					if(car.speed>settings.car_speed_max*0.1){
+						leaveTime += leaveLen/car.speed;
+					}else{
+						leaveTime += leaveLen/(settings.car_speed_max*0.1);
+					}
+					const tolerLength = leaveTime*settings.car_speed_max;
+					//oppositFrom>oppositToにいる車を検索
+					for (let j = 0; j < cars.length; j++) {
+	                    if (j === i) continue;
+	                    const other = cars[j];
+	                    if(other.route.length === other.routeIndex+1)continue;
+	                    const from = other.route[other.routeIndex];
+	                    const to = other.route[other.routeIndex + 1];
+						let oppositSection = mapList.find(s => s.from === sigInf.oppositFrom && s.to === sigInf.oppositTo);
+						const oppositLength = oppsitSection.distance;
+	                    if (from === sigInf.oppositFrom && to === sigInf.oppositTo) {
+	                        const distanceRemaining = oppositLength - other.traveled;
+	                		if(distanceRemaining < tolerLength){
+								shouldStop = true
+							}      
+	                    }
+	                }
+				}
+				if (shouldStop) stop = true;
+			}
+
     
             // --------- ④ 加減速処理 ---------
             if (stop) {
@@ -690,56 +604,56 @@
         ctx.fillRect(0, 2788, canvas.width,24);
         
         // 信号描画（4方向に矢印表示・状態別の色）
-        for (let sig of signals) {
-		// --- 各信号の状態に応じた背景色を決定 ---
-		const getBgColor = (dir, state) => {
-			if (dir === "Y") {
-				if (state === "blueY") return "green";
-				if (state === "rightY") return "blue";
-				if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
-				return "red";
-			} else if (dir === "X") {
-				if (state === "blueX") return "green";
-				if (state === "rightX") return "blue";
-				if (state === "yellow1X" || state === "yellow2X") return "yellow";
-				return "red";
-			}
-		};
-	
-		// --- 矢印描画 ---
-		const drawSignal = (x, y, bgColor, angle) => {
-			// 丸背景：信号状態によって変化
-			ctx.fillStyle = bgColor;
-			ctx.beginPath();
-			ctx.arc(x, y, 10, 0, Math.PI * 2);
-			ctx.fill();
-	
-			// 矢印：常に白
-			ctx.save();
-			ctx.translate(x, y);
-			ctx.rotate(angle);
-			ctx.fillStyle = "white";  // ← 矢印の色を固定
-			ctx.beginPath();
-			ctx.moveTo(-4, -3);
-			ctx.lineTo(4, 0);
-			ctx.lineTo(-4, 3);
-			ctx.closePath();
-			ctx.fill();
-			ctx.restore();
-		};
-	
-		// 左（X方向→右向き）
-		drawSignal(sig.x.left - 16, sig.y.top - 8, getBgColor("X", sig.state), 0);
-		
-		// 上（Y方向→下向き）
-		drawSignal(sig.x.right + 8, sig.y.top - 16, getBgColor("Y", sig.state), Math.PI / 2);
-		
-		// 右（X方向→左向き）
-		drawSignal(sig.x.right + 16, sig.y.bottom + 8, getBgColor("X", sig.state), Math.PI);
-		
-		// 下（Y方向→上向き）
-		drawSignal(sig.x.left - 8, sig.y.bottom + 16, getBgColor("Y", sig.state), -Math.PI / 2);
-	}
+    	for (let sig of signals) {
+            // --- 各信号の状態に応じた色を決定する関数 ---
+            const getColor = (dir, state) => {
+                if (dir === "Y") {
+                    if (state === "blueY") return "green";
+                    if (state === "rightY") return "blue";
+                    if (state === "yellow1Y" || state === "yellow2Y") return "yellow";
+                    return "red";
+                } else if (dir === "X") {
+                    if (state === "blueX") return "green";
+                    if (state === "rightX") return "blue";
+                    if (state === "yellow1X" || state === "yellow2X") return "yellow";
+                    return "red";
+                }
+            };
+        
+            // --- 各方向の信号（丸＋矢印）を描画 ---
+            const drawSignal = (x, y, color, angle) => {
+                // 丸背景
+                ctx.fillStyle = "#333";
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.fill();
+        
+                // 矢印
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);  // 向きを回転
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(-4, -3);
+                ctx.lineTo(4, 0);
+                ctx.lineTo(-4, 3);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            };
+        
+            // 左（X方向→右向き）
+            drawSignal(sig.x.left - 16, sig.y.top - 8, getColor("X", sig.state), 0);
+            
+            // 上（Y方向→下向き）
+            drawSignal(sig.x.right + 8, sig.y.top - 16, getColor("Y", sig.state), Math.PI / 2);
+            
+            // 右（X方向→左向き）
+            drawSignal(sig.x.right + 16, sig.y.bottom + 8, getColor("X", sig.state), Math.PI);
+            
+            // 下（Y方向→上向き）
+            drawSignal(sig.x.left - 8, sig.y.bottom + 16, getColor("Y", sig.state), -Math.PI / 2);
+        }
 
 
         
