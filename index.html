@@ -441,85 +441,86 @@
     
             // --------- ③ 信号による停止判定 ---------
             // --- currentFrom に対応する信号情報をマッピング ---
-			const fromToSignalMap = {
-				"B": { no: 0, next: "str", shaft: "y", direction: "top" },
-				"K": { no: 0, next: "right", shaft: "y", direction: "top" ,oppositFrom: "S",oppositTo:"T"},
-				"G": { no: 1, next: "str", shaft: "y", direction: "top" },
-				"M": { no: 1, next: "right", shaft: "y", direction: "top",oppositFrom: "P",oppositTo:"Q" },
-				"P": { no: 1, next: "str", shaft: "y", direction: "bottom" },
-				"W": { no: 1, next: "right", shaft: "y", direction: "bottom",oppositFrom: "G",oppositTo:"H"},
-				"S": { no: 0, next: "str", shaft: "y", direction: "bottom" },
-				"Y": { no: 0, next: "right", shaft: "y", direction: "bottom",oppositFrom: "B",oppositTo:"E" },
-				"b": { no: 0, next: "str", shaft: "x", direction: "left" },
-				"c": { no: 0, next: "right", shaft: "x", direction: "left",oppositFrom: "g",oppositTo:"F"},
-				"g": { no: 0, next: "str", shaft: "x", direction: "right" },
-				"h": { no: 0, next: "right", shaft: "x", direction: "right",oppositFrom: "b",oppositTo:"U" },
-				"l": { no: 1, next: "str", shaft: "x", direction: "left" },
-				"m": { no: 1, next: "right", shaft: "x", direction: "left",oppositFrom: "q",oppositTo:"I" },
-				"q": { no: 1, next: "str", shaft: "x", direction: "right" },
-				"r": { no: 1, next: "right", shaft: "x", direction: "right",oppositFrom: "l",oppositTo:"R"  }
-			};
+		const fromToSignalMap = {
+			"B": { no: 0, next: "str", shaft: "y", direction: "top" },
+			"K": { no: 0, next: "right", shaft: "y", direction: "top" ,oppositFrom: "S",oppositTo:"T"},
+			"G": { no: 1, next: "str", shaft: "y", direction: "top" },
+			"M": { no: 1, next: "right", shaft: "y", direction: "top",oppositFrom: "P",oppositTo:"Q" },
+			"P": { no: 1, next: "str", shaft: "y", direction: "bottom" },
+			"W": { no: 1, next: "right", shaft: "y", direction: "bottom",oppositFrom: "G",oppositTo:"H"},
+			"S": { no: 0, next: "str", shaft: "y", direction: "bottom" },
+			"Y": { no: 0, next: "right", shaft: "y", direction: "bottom",oppositFrom: "B",oppositTo:"E" },
+			"b": { no: 0, next: "str", shaft: "x", direction: "left" },
+			"c": { no: 0, next: "right", shaft: "x", direction: "left",oppositFrom: "g",oppositTo:"F"},
+			"g": { no: 0, next: "str", shaft: "x", direction: "right" },
+			"h": { no: 0, next: "right", shaft: "x", direction: "right",oppositFrom: "b",oppositTo:"U" },
+			"l": { no: 1, next: "str", shaft: "x", direction: "left" },
+			"m": { no: 1, next: "right", shaft: "x", direction: "left",oppositFrom: "q",oppositTo:"I" },
+			"q": { no: 1, next: "str", shaft: "x", direction: "right" },
+			"r": { no: 1, next: "right", shaft: "x", direction: "right",oppositFrom: "l",oppositTo:"R"  }
+		};
 			
-			// --- 該当する信号設定を取得 ---
-			const sigInf = fromToSignalMap[currentFrom];
-			if (sigInf) {
-				const signalData = signals[sigInf.no];
-				const sigShaft = signalData[sigInf.shaft];
-				const sigPoint = sigShaft[sigInf.direction];
-				const carPoint = car[sigInf.shaft];
-				const signalGap = Math.abs(sigPoint - carPoint);
-			
-				const direction_num = {
-				top: 1,
-				bottom: -1,
-				left: 1,
-				right: -1
-				}[sigInf.direction] || 0;
-			
-				let shouldStop =
-				(
-					(sigInf.shaft === "x" && sigInf.next === "str" && signalData.state !== "blueX") ||
-					(sigInf.shaft === "x" && sigInf.next === "right" && signalData.state !== "rightX") ||
-					(sigInf.shaft === "y" && sigInf.next === "str" && signalData.state !== "blueY") ||
-					(sigInf.shaft === "y" && sigInf.next === "right" && signalData.state !== "rightY")
-				) &&
-				(sigPoint - carPoint) * direction_num > 0 &&
-				signalGap <= stopLength + 5;
+		// --- 該当する信号設定を取得 ---
+		const sigInf = fromToSignalMap[currentFrom];
+		if (sigInf) {
+			const signalData = signals[sigInf.no];
+			const sigShaft = signalData[sigInf.shaft];
+			const sigPoint = sigShaft[sigInf.direction];
+			const carPoint = car[sigInf.shaft];
+			const signalGap = Math.abs(sigPoint - carPoint);
+		
+			const direction_num = {
+			top: 1,
+			bottom: -1,
+			left: 1,
+			right: -1
+			}[sigInf.direction] || 0;
+		
+			let shouldStop =
+			(
+				(sigInf.shaft === "x" && sigInf.next === "str" && signalData.state !== "blueX") ||
+				(sigInf.shaft === "x" && sigInf.next === "right" && signalData.state !== "rightX") ||
+				(sigInf.shaft === "y" && sigInf.next === "str" && signalData.state !== "blueY") ||
+				(sigInf.shaft === "y" && sigInf.next === "right" && signalData.state !== "rightY")
+			) &&
+			(sigPoint - carPoint) * direction_num > 0 &&
+			signalGap <= stopLength + 5;
 
-				if(sigInf.next === "right"&&shouldStop&&
-				   (
-					(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
-					(sigInf.shaft === "y" &&(signalData.state === "blueY" || signalData.state === "yellow1Y"))
-				   )
-				  ){
-					shouldStop = false;
-					const leaveLen =(sigPoint - carPoint) * direction_num;
-					let leaveTime = 3;
-					if(car.speed>settings.car_speed_max*0.1){
-						leaveTime += leaveLen/car.speed;
-					}else{
-						leaveTime += leaveLen/(settings.car_speed_max*0.1);
-					}
-					const tolerLength = leaveTime*settings.car_speed_max;
-					//oppositFrom>oppositToにいる車を検索
-					for (let j = 0; j < cars.length; j++) {
-						if (j === i) continue;
-						const other = cars[j];
-						if(other.route.length === other.routeIndex+1)continue;
-						const from = other.route[other.routeIndex];
-						const to = other.route[other.routeIndex + 1];
-						let oppositSection = mapList.find(s => s.from === sigInf.oppositFrom && s.to === sigInf.oppositTo);
-						const oppositLength = oppsitSection.distance;
-	                    if (from === sigInf.oppositFrom && to === sigInf.oppositTo) {
-	                        const distanceRemaining = oppositLength - other.traveled;
-	                		if(distanceRemaining < tolerLength){
-								shouldStop = true
-							}      
-	                    }
-	                }
+			if(sigInf.next === "right"&&shouldStop&&
+			   (
+				(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
+				(sigInf.shaft === "y" &&(signalData.state === "blueY" || signalData.state === "yellow1Y"))
+			   )
+			  ){
+				shouldStop = false;
+				const leaveLen =(sigPoint - carPoint) * direction_num;
+				let leaveTime = 3;
+				if(car.speed>settings.car_speed_max*0.1){
+					leaveTime += leaveLen/car.speed;
+				}else{
+					leaveTime += leaveLen/(settings.car_speed_max*0.1);
 				}
-				if (shouldStop) stop = true;
+				const tolerLength = leaveTime*settings.car_speed_max;
+				//oppositFrom>oppositToにいる車を検索
+				for (let j = 0; j < cars.length; j++) {
+					if (j === i) continue;
+					const other = cars[j];
+					if(other.route.length === other.routeIndex+1)continue;
+					const from = other.route[other.routeIndex];
+					const to = other.route[other.routeIndex + 1];
+					let oppositSection = mapList.find(s => s.from === sigInf.oppositFrom && s.to === sigInf.oppositTo);
+					const oppositLength = oppositSection.distance;
+					if (from === sigInf.oppositFrom && to === sigInf.oppositTo) {
+						const distanceRemaining = oppositLength - other.traveled;
+						if(distanceRemaining < tolerLength){
+							shouldStop = true
+						}
+					}      
+				}
 			}
+		
+			if (shouldStop) stop = true;
+		}
 
     
             // --------- ④ 加減速処理 ---------
