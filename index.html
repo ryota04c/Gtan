@@ -400,7 +400,6 @@
                     let gap = other.traveled-car.traveled
     
                     if (stopLength+20 > gap && gap>0) {
-                        console.log("同区間");
                         stop = true;
                         foundFrontCar = true;
                         break;
@@ -434,13 +433,45 @@
                 }
                 
                 if (minGap < stopLength + 20) {
-                    console.log("次区間");
+                    stop = true;
+                    foundFrontCar = true;
+                }
+            }
+
+             // --------- 2.5 次次区間の前方車チェック ---------
+            if (!foundFrontCar && car.routeIndex + 3 < car.route.length) {
+                let nextFrom = car.route[car.routeIndex + 1];
+                let center = car.route[car.routeIndex + 2];
+                let nextTo2 = car.route[car.routeIndex + 3];
+                let nextSection = mapList.find(s => s.from === nextFrom && s.to === center);
+                let nextSection2 = mapList.find(s => s.from === center && s.to === nextTo2);
+    
+                let minGap = Infinity;
+    
+                for (let j = 0; j < cars.length; j++) {
+                    if (j === i) continue;
+                    const other = cars[j];
+                
+                    // other.car が次の区間を実際に走っているときだけチェック
+                    if(other.routeIndex + 1 >= other.route.length)continue;
+                    const from = other.route[other.routeIndex];
+                    const to = other.route[other.routeIndex + 1];
+                    if (from === center && to === nextTo2) {
+                        const distanceRemaining = distanceInSection - car.traveled;
+                        const totalGap = distanceRemaining + nextSection.distance + other.traveled;
+                
+                        minGap = Math.min(minGap, totalGap);
+                    }
+                }
+                
+                if (minGap < stopLength + 20) {
                     stop = true;
                 }
             }
+                
     
-            // --------- ③ 信号による停止判定 ---------
-            // --- currentFrom に対応する信号情報をマッピング ---
+        // --------- ③ 信号による停止判定 ---------
+        // --- currentFrom に対応する信号情報をマッピング ---
 		const fromToSignalMap = {
 			"B": { no: 0, next: "str", shaft: "y", direction: "top" },
 			"K": { no: 0, next: "right", shaft: "y", direction: "top" ,oppositFrom: "S",oppositTo:"T"},
@@ -513,7 +544,7 @@
 					if (from === sigInf.oppositFrom && to === sigInf.oppositTo) {
 						const distanceRemaining = oppositLength - other.traveled;
 						if(distanceRemaining < tolerLength){
-							shouldStop = true
+							shouldStop = true;
 						}
 					}      
 				}
