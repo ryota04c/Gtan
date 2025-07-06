@@ -78,7 +78,6 @@
         });
 
     function firstSigSet(){
-        console.log(sigTimer);
         for(let i = 0;i<signals.length;i++){
             signals[i].timer = sigTimer[i].offset;
         }
@@ -384,7 +383,7 @@
             const carFrontY = car.y-carWidth/2*Math.sin(section.direction_arg * Math.PI);
             
             //車の停止距離を認識
-            let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.5;
+            let stopLength = car.speed*car.speed/(2*settings.acceleration) + car.speed*0.75;
             //高速域では速度に応じた誤差を導入
             if(car.speed > settings.car_speed_max*0.3)stopLength += car.speed*Math.random()/3;
     
@@ -517,14 +516,6 @@
 			(sigPoint - carPoint) * direction_num > 0 &&
 			signalGap <= stopLength + 5;
 
-			if(shouldStop && 
-			   	(sigInf.shaft === "x" && sigInf.next === "str" && signalData.state === "yellow1X") ||
-				(sigInf.shaft === "x" && sigInf.next === "right" && signalData.state === "yellow2X") ||
-				(sigInf.shaft === "y" && sigInf.next === "str" && signalData.state === "yellow1Y") ||
-				(sigInf.shaft === "y" && sigInf.next === "right" && signalData.state === "yellow2Y")
-			   && signalGap - 5 > car.speed*car.speed/(2*settings.acceleration)
-			   )shouldStop = false;
-
 			if(sigInf.next === "right"&&shouldStop&&
 			   (
 				(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
@@ -577,7 +568,7 @@
             car.totalLength += moveDistance;
             //mtz担当部
                 car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
-                if(speed2 <= 15 && speed2 !== 0){
+                if(speed2 <= 15 && speed2 > 1){
                     car.crowdTime += delta/1000;
                     car.crowdLength += moveDistance/2;
                 }else if(speed2 > 15&&car.crowdTime !== 0){
