@@ -517,6 +517,14 @@
 			(sigPoint - carPoint) * direction_num > 0 &&
 			signalGap <= stopLength + 5;
 
+			if(shouldStop && 
+			   	(sigInf.shaft === "x" && sigInf.next === "str" && signalData.state === "yellow1X") ||
+				(sigInf.shaft === "x" && sigInf.next === "right" && signalData.state === "yellow2X") ||
+				(sigInf.shaft === "y" && sigInf.next === "str" && signalData.state === "yellow1Y") ||
+				(sigInf.shaft === "y" && sigInf.next === "right" && signalData.state === "yellow2Y")
+			   && signalGap - 5 > car.speed*car.speed/(2*settings.acceleration)
+			   )shouldStop = false;
+
 			if(sigInf.next === "right"&&shouldStop&&
 			   (
 				(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
