@@ -486,7 +486,7 @@
 				(sigPoint - carPoint) * direction_num > 0 &&
 				signalGap <= stopLength + 5;
 
-				if(sigInf.next === "right"&&shoudStop&&
+				if(sigInf.next === "right"&&shouldStop&&
 				   (
 					(sigInf.shaft === "x" &&(signalData.state === "blueX" || signalData.state === "yellow1X"))||
 					(sigInf.shaft === "y" &&(signalData.state === "blueY" || signalData.state === "yellow1Y"))
@@ -503,11 +503,11 @@
 					const tolerLength = leaveTime*settings.car_speed_max;
 					//oppositFrom>oppositToにいる車を検索
 					for (let j = 0; j < cars.length; j++) {
-	                    if (j === i) continue;
-	                    const other = cars[j];
-	                    if(other.route.length === other.routeIndex+1)continue;
-	                    const from = other.route[other.routeIndex];
-	                    const to = other.route[other.routeIndex + 1];
+						if (j === i) continue;
+						const other = cars[j];
+						if(other.route.length === other.routeIndex+1)continue;
+						const from = other.route[other.routeIndex];
+						const to = other.route[other.routeIndex + 1];
 						let oppositSection = mapList.find(s => s.from === sigInf.oppositFrom && s.to === sigInf.oppositTo);
 						const oppositLength = oppsitSection.distance;
 	                    if (from === sigInf.oppositFrom && to === sigInf.oppositTo) {
