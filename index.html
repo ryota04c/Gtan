@@ -224,27 +224,27 @@
         
     }
 
-    function spawnCarFromLeft1() {
-        let routeRandom = Math.random();
-        let route = 
-            routeRandom < 0.03? ["a","b","c","d","F","G","H","o"]:
-            routeRandom < 0.27 ? ["a","b","c","d","F","G","H","I","J"]:
-            routeRandom < 0.30 ? ["a","b","c","d","F","G","M","N","Q","t"]:
-            routeRandom < 0.60 ? ["a","b","U","V"]:
-            ["a","b","U","E","e"];
+	function spawnCarFromLeft1() {
+		let routeRandom = Math.random();
+		let route = 
+			routeRandom < 0.03? ["a","b","c","d","F","G","H","o"]:
+			routeRandom < 0.27 ? ["a","b","c","d","F","G","H","I","J"]:
+			routeRandom < 0.30 ? ["a","b","c","d","F","G","M","N","Q","t"]:
+			routeRandom < 0.60 ? ["a","b","U","V"]:
+			["a","b","U","E","e"];
 		let routeId = 
             routeRandom < 0.03? "L1-RL":
             routeRandom < 0.27 ?"L1-RS":
             routeRandom < 0.30 ? "L1-RR":
             routeRandom < 0.60 ? "L1-L":
             "L1-S";
-		cars.push({
+	    cars.push({
 		    x: 0,
 		    y: 791,
 		    speed: settings.car_speed_max,
 		    targetSpeed: settings.car_speed_max,
 		    route:route,
-	        routeId: routeId
+	        routeId: routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
