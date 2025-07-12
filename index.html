@@ -160,12 +160,19 @@
             routeRandom < 0.28 ? ["A","B","E","F","G","H","o"]:
             routeRandom < 0.36 ? ["A","B","E","F","G","M","N","Q","t"]:
             ["A","B","E","F","G","H","I","J"];
+		let routeId = 
+            routeRandom < 0.1? "T-R":
+            routeRandom < 0.20 ? "T-L":
+            routeRandom < 0.28 ? "T-SL":
+            routeRandom < 0.36 ? "T-SR":
+            "T-SS";
         cars.push({
             x: 409,
             y: 0,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
+			routeId: routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -189,12 +196,19 @@
             routeRandom < 0.28 ? ["O","P","Q","R","S","T","j"]:
             routeRandom < 0.36 ? ["O","P","Q","R","S","Y","Z","E","e"]:
             ["O","P","Q","R","S","T","U","V"];
+		let routeId = 
+            routeRandom < 0.1? "B-R":
+            routeRandom < 0.20 ? "B-L":
+            routeRandom < 0.28 ? "B-SL":
+            routeRandom < 0.36 ? "B-SR":
+            "B-SS";
         cars.push({
             x: 391,
             y: 3600,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
+			routeId : routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -218,12 +232,19 @@
             routeRandom < 0.30 ? ["a","b","c","d","F","G","M","N","Q","t"]:
             routeRandom < 0.60 ? ["a","b","U","V"]:
             ["a","b","U","E","e"];
-        cars.push({
-            x: 0,
-            y: 791,
-            speed: settings.car_speed_max,
-            targetSpeed: settings.car_speed_max,
-            route:route,
+		let routeId = 
+            routeRandom < 0.03? "L1-RL":
+            routeRandom < 0.27 ?"L1-RS":
+            routeRandom < 0.30 ? "L1-RR":
+            routeRandom < 0.60 ? "L1-L":
+            "L1-S";
+		cars.push({
+		    x: 0,
+		    y: 791,
+		    speed: settings.car_speed_max,
+		    targetSpeed: settings.car_speed_max,
+		    route:route,
+	        routeId: routeId
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -246,12 +267,19 @@
             routeRandom < 0.30 ? ["f","g","F","G","M","N","Q","t"]:
             routeRandom < 0.60 ? ["f","g","h","i","U","V"]:
             ["f","g","F","T","j"];
+		let routeId = 
+            routeRandom < 0.03? "R1-LL":
+            routeRandom < 0.27 ? "R1-LS":
+            routeRandom < 0.30 ? "R1-LR":
+            routeRandom < 0.60 ? "R1-R":
+            "R1-S";
         cars.push({
             x: 800,
             y: 809,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
+			routeId: routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -275,12 +303,19 @@
             routeRandom < 0.30 ? ["k","l","R","S","Y","Z","E","e"]:
             routeRandom < 0.60 ? ["k","l","m","n","I","J"]:
             ["k","l","R","H","o"];
+		let routeId = 
+            routeRandom < 0.03? "L2-LL":
+            routeRandom < 0.27 ? "L2-LS":
+            routeRandom < 0.30 ? "L2-LR":
+            routeRandom < 0.60 ? "L2-R":
+           	"L2-S";
         cars.push({
             x: 0,
             y: 2791,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
+			routeId:routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -304,12 +339,19 @@
             routeRandom < 0.30 ? ["p","q","r","s","R","S","Y","Z","E","e"]:
             routeRandom < 0.60 ? ["p","q","I","J"]:
             ["p","q","I","Q","t"];
+		let route = 
+            routeRandom < 0.03? "R2-RL":
+            routeRandom < 0.27 ? "R2-RS":
+            routeRandom < 0.30 ? "R2-RR":
+            routeRandom < 0.60 ? "R2-L":
+            "R2-S";
         cars.push({
             x: 800,
             y: 2809,
             speed: settings.car_speed_max,
             targetSpeed: settings.car_speed_max,
             route:route,
+			routeId : routeId,
             routeIndex:0,
             traveled :0 ,
             routeMax:route.length-2 ,
@@ -568,7 +610,7 @@
             car.totalLength += moveDistance;
             //mtz担当部
                 car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
-                if(speed2 <= 15 && speed2 > 1){
+                if(speed2 <= 15 && speed2 > 2){
                     car.crowdTime += delta/1000;
                     car.crowdLength += moveDistance/2;
                 }else if(speed2 > 15&&car.crowdTime !== 0){
@@ -614,10 +656,11 @@
           "Content-Type": "text/plain"  // ← ここが超重要！
         },
         body: JSON.stringify({
-          feeling: car.feeling,
-          runTime: car.runTime,   // ← runTime の typo 修正も！
-          totalLength: car.totalLength,
-          CO2: car.CO2
+          	feeling: car.feeling,
+          	runTime: car.runTime,   // ← runTime の typo 修正も！
+          	totalLength: car.totalLength,
+          	CO2: car.CO2,
+			routeId: car.route
         })
       })
       .then(res => res.text())
