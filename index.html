@@ -609,7 +609,11 @@
             car.runTime += delta/1000;
             car.totalLength += moveDistance;
             //mtz担当部
-                car.CO2 += (0.0406*speed2*speed2 - 6.17*speed2 + 389.89)*moveDistance/2/1000;
+		if(speed2 >= 5){
+                	car.CO2 += (0.007*speed2*speed2 -0.805*speed2 + 53.687+562.59/speed2)*moveDistance/2/1000;
+		}else{
+			car.co2+=(4.50772*speed2*speed2-68.3158*speed2+391.24)*moveDistance/2/1000;	
+		}
                 if(speed2 <= 15 && speed2 > 2){
                     car.crowdTime += delta/1000;
                     car.crowdLength += moveDistance/2;
