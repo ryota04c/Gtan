@@ -686,24 +686,25 @@
     }
     //データ転送
     function sendResultToSheet(car) {
-      fetch("https://script.google.com/macros/s/AKfycbxF6ldhtbvAFX1fiEX_A1MvNNFt9iCTGS3-rrKuH_waXvdeVBTFbZAKWUTxOXB6Xixn/exec", {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain"  // ← ここが超重要！
-        },
-        body: JSON.stringify({
-		shumId: shumId,
-          	feeling: car.feeling,
-          	runTime: car.runTime,   // ← runTime の typo 修正も！
-          	totalLength: car.totalLength,
-          	CO2: car.CO2,
-			routeId: car.routeId
-        })
-      })
-      .then(res => res.text())
-      .then(data => console.log("送信成功:", data))
-      .catch(err => console.error("送信失敗:", err));
-    }
+	  fetch("https://script.google.com/macros/s/AKfycby5MR0M818XfrdilF7SJhECSAhObj1RlmyW1s2Sn8dyTdnvkPwlnDFDu2HriXXoMKa0/exec", {
+	    method: "POST",
+	    headers: {
+	      "Content-Type": "application/json" // ← 修正済み
+	    },
+	    body: JSON.stringify({
+	      shumId: shumId,
+	      feeling: car.feeling,
+	      runTime: car.runTime,
+	      totalLength: car.totalLength,
+	      CO2: car.CO2,
+	      routeId: car.routeId
+	    })
+	  })
+	  .then(res => res.text())
+	  .then(data => console.log("送信成功:", data))
+	  .catch(err => console.error("送信失敗:", err));
+	}
+
     
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
