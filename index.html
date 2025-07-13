@@ -8,10 +8,14 @@
     </style>
 </head>
 <body>
+    <h2 style="text-align:center;">シミュレーション番号を入力してください</h2>
+    <div style="text-align:center; margin-bottom: 20px;">
+        <input type="number" id="scenarioInput" placeholder="例: 1" />
+        <button onclick="onStartClick()">開始</button>
+    </div>
     <!--描画枠の設定-->
-<canvas id="trafficCanvas" width="800" height="3600"></canvas>
+    <canvas id="trafficCanvas" width="800" height="3600" style="display:none;"></canvas>
 
-    <!--描画枠の設定-->
 <script>
     //描画枠
     const canvas = document.getElementById("trafficCanvas");
@@ -51,8 +55,24 @@
         },
     ];
     
-    let time = 0;
-    // パラメータを取得してからシミュレーション開始
+    let mapList = [];
+let sigTimer = [];
+let time = 0;
+
+// ボタンを押したときの処理
+function onStartClick() {
+    const scenarioId = document.getElementById("scenarioInput").value;
+    if (!scenarioId || isNaN(scenarioId)) {
+        alert("正しいシナリオ番号を入力してください。");
+        return;
+    }
+
+    // キャンバス表示
+    canvas.style.display = "block";
+
+    // パラメータを取得してシミュレーション開始
+    const PARAMS_URL = `https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec?scenario=${scenarioId}`;
+
     fetch(PARAMS_URL)
         .then(res => res.json())
         .then(data => {
@@ -76,6 +96,7 @@
             spawnCarFromLeft2Loop();
             spawnCarFromRight2Loop();
         });
+}
 
     function firstSigSet(){
         for(let i = 0;i<signals.length;i++){
