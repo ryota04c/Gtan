@@ -61,6 +61,7 @@
 	let time = 0;
 	let shumId = "";
 	let simulationStartTime = null;
+	let carCount = 0;
 	
 	// ボタンを押したときの処理
 	function onStartClick() {
@@ -675,7 +676,10 @@
             if (car.routeIndex >= car.route.length - 1) {
                 console.log("ルート終了 → 除外:", car.route);
                 car.finish = 1;
-                sendResultToSheet(car);
+		    	carCount++;
+		    	if(carCount>50){
+                	sendResultToSheet(car);
+				}
             }
         }
     
