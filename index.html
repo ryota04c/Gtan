@@ -58,13 +58,16 @@
     let mapList = [];
 let sigTimer = [];
 let time = 0;
+	let ID = "";
 
 // ボタンを押したときの処理
 function onStartClick() {
     const scenarioId = document.getElementById("scenarioInput").value;
-    if (!scenarioId || isNaN(scenarioId)) {
+    if (!scenarioId) {
         alert("正しいシナリオ番号を入力してください。");
         return;
+    }else{
+	    ID = scenarioId;
     }
 
     // キャンバス表示
@@ -681,6 +684,7 @@ function onStartClick() {
           "Content-Type": "text/plain"  // ← ここが超重要！
         },
         body: JSON.stringify({
+		ID: ID,
           	feeling: car.feeling,
           	runTime: car.runTime,   // ← runTime の typo 修正も！
           	totalLength: car.totalLength,
