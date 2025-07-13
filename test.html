@@ -10,13 +10,20 @@
 
   <script>
     function sendTest() {
-      fetch("https://script.google.com/macros/s/…/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbypF05dxXZdiVDROit4wornXtyOSg0L-7lIwGuAHeHGhYbPUXZHTp-9ihoNR9gjJk_4/exec", {
         method: "POST",
         mode: "no-cors",  // ← これでCORSチェックを無視して送信だけする
         headers: {
           "Content-Type": "text/plain"  // ただしこのContent-Typeは一部制限あり
         },
-        body: JSON.stringify({ /* データ */ }),
+        body: JSON.stringify({
+          shumId: 1,
+          feeling: 5,
+          runTime: 100,
+          totalLength: 500,
+          CO2: 50,
+          routeId: 1
+        }),
       })
       .catch(err => {
         // no-corsモードではfetchは成功でもレスポンスは opaque で中身が取れません
