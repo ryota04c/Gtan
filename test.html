@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>GAS POSTテスト</title>
+</head>
+<body>
+  <h1>GASへPOSTテスト</h1>
+  <button onclick="sendTest()">送信する</button>
+
+  <script>
+    function sendTest() {
+      fetch("https://script.google.com/macros/s/AKfycbwoxWE-WxHrGEnuuG3VzMKeUR6tBtLx-uY5XYbSx76JRFdO2e-0M24_n7GFmfP7AS7M/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          shumId: 1,
+          feeling: 5,
+          runTime: 100,
+          totalLength: 500,
+          CO2: 50,
+          routeId: 1
+        }),
+      })
+      .then(res => res.text())
+      .then(data => {
+        console.log("成功:", data);
+        alert("送信成功: " + data);
+      })
+      .catch(err => {
+        console.error("失敗:", err);
+        alert("送信失敗: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
