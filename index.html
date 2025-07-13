@@ -59,7 +59,7 @@
     let mapList = [];
 	let sigTimer = [];
 	let time = 0;
-	let ID = "";
+	let shumId = "";
 	let simulationStartTime = null;
 	
 	// ボタンを押したときの処理
@@ -69,7 +69,7 @@
 	        alert("正しいシナリオ番号を入力してください。");
 	        return;
 	    }else{
-		    ID = scenarioId;
+		    shumId = scenarioId;
 	    }
 		simulationStartTime = Date.now(); // ← ここで記録
 		cars = [];
@@ -688,7 +688,7 @@
           "Content-Type": "text/plain"  // ← ここが超重要！
         },
         body: JSON.stringify({
-		ID: ID,
+		shumId: shumId,
           	feeling: car.feeling,
           	runTime: car.runTime,   // ← runTime の typo 修正も！
           	totalLength: car.totalLength,
