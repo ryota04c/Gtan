@@ -687,24 +687,24 @@
     //データ転送
 	  function sendResultToSheet(car) {
 		 
-		 fetch("https://script.google.com/macros/s/AKfycbwcyVtpfweLdMfQJ5A8vw7qaQ3EkGkdKUX5T2nOSby5FJv_ZNv1jPMl9A8aRRDP-Jsv/exec", {
-			    method: "POST",
-			    headers: {
-			      // これを "text/plain" にするとプリフライトを回避できます
-			      "Content-Type": "text/plain"
-			    },
-			    body: JSON.stringify({
-			      shumId: shumId,
-			      feeling: car.feeling,
-			      runTime: car.runTime,
-			      totalLength: car.totalLength,
-			      CO2: car.CO2,
-			      routeId: car.routeId
-			    })
-			  })
-			  .then(res => res.text())
-			  .then(data => console.log("送信成功:", data))
-			  .catch(err => console.error("送信失敗:", err));
+		 fetch("https://script.google.com/macros/s/AKfycbyWkMeLxwjN4FUmeRjcEfuyL55Y_PlOwhtLKmkrZgej09q6eUgP_cR9ulEEt3GLhB5W/exec", {
+		  method: "POST",
+		  headers: {
+		    "Content-Type": "application/json"  // application/jsonでOK。プリフライト来るがdoOptions対応済み
+		  },
+		  body: JSON.stringify({
+		    shumId: shumId,
+		    feeling: car.feeling,
+		    runTime: car.runTime,
+		    totalLength: car.totalLength,
+		    CO2: car.CO2,
+		    routeId: car.routeId
+		  })
+		})
+		.then(res => res.text())
+		.then(data => console.log("送信成功:", data))
+		.catch(err => console.error("送信失敗:", err));
+
 	}
 
 
