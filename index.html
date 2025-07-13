@@ -693,12 +693,12 @@
 		          "Content-Type": "text/plain"  // ただしこのContent-Typeは一部制限あり
 		        },
 		        body: JSON.stringify({
-		          shumId: 1,
-		          feeling: 5,
-		          runTime: 100,
-		          totalLength: 500,
-		          CO2: 50,
-		          routeId: 1
+		          shumId: shumId,
+		          feeling: car.feeling,
+		          runTime: car.runTime,
+		          totalLength: car.TotalLength,
+		          CO2: car.CO2,
+		          routeId: car.routeId
 		        }),
 		      })
 		      .catch(err => {
