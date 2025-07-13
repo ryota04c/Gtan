@@ -80,29 +80,33 @@
 	    // パラメータを取得してシミュレーション開始
 	    const PARAMS_URL = `https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec?scenario=${scenarioId}`;
 	
-	    fetch(PARAMS_URL)
-	        .then(res => res.json())
-	        .then(data => {
-	            settings = {
-	                car_spawn_rate_Y: parseInt(data.params.car_spawn_rate_Y),
-	                car_spawn_rate_X1: parseInt(data.params.car_spawn_rate_X1),
-	                car_spawn_rate_X2: parseInt(data.params.car_spawn_rate_X2),
-	                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
-	                car_length: parseFloat(data.params.car_length_m),
-	                acceleration: parseFloat(data.params.acceleration_mps2)
-	            };
-	            mapList = data.map;
-	            sigTimer = data.signal;
-	
-	            firstSigSet();
-	            requestAnimationFrame(loop);
-	            spawnCarFromTopLoop();
-	            spawnCarFromBottomLoop();
-	            spawnCarFromLeft1Loop();
-	            spawnCarFromRight1Loop();
-	            spawnCarFromLeft2Loop();
-	            spawnCarFromRight2Loop();
-	        });
+	    requestAnimationFrame(() => {
+		    // パラメータ取得してから開始
+		    fetch(PARAMS_URL)
+		        .then(res => res.json())
+		        .then(data => {
+		            settings = {
+		                car_spawn_rate_Y: parseInt(data.params.car_spawn_rate_Y),
+		                car_spawn_rate_X1: parseInt(data.params.car_spawn_rate_X1),
+		                car_spawn_rate_X2: parseInt(data.params.car_spawn_rate_X2),
+		                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
+		                car_length: parseFloat(data.params.car_length_m),
+		                acceleration: parseFloat(data.params.acceleration_mps2)
+		            };
+		            mapList = data.map;
+		            sigTimer = data.signal;
+		
+		            firstSigSet();
+		            requestAnimationFrame(loop);
+		            spawnCarFromTopLoop();
+		            spawnCarFromBottomLoop();
+		            spawnCarFromLeft1Loop();
+		            spawnCarFromRight1Loop();
+		            spawnCarFromLeft2Loop();
+		            spawnCarFromRight2Loop();
+		        });
+		});
+
 	}
 
     function firstSigSet(){
