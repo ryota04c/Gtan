@@ -684,28 +684,27 @@
             car.x >= -50 && car.x <= canvas.width + 50 &&
             car.y >= -50 && car.y <= canvas.height + 50);
     }
-    //データ転送
-	  function sendResultToSheet(car) {
-		 
-		 fetch("https://script.google.com/macros/s/AKfycbwoxWE-WxHrGEnuuG3VzMKeUR6tBtLx-uY5XYbSx76JRFdO2e-0M24_n7GFmfP7AS7M/exec", {
-			  method: "POST",
-			  headers: {
-			    "Content-Type": "application/json"
-			  },
-			  body: JSON.stringify({
-			    shumId: 1,
-			    feeling: 5,
-			    runTime: 100,
-			    totalLength: 500,
-			    CO2: 50,
-			    routeId: 1
-			  }),
-			})
-			  .then((res) => res.text())
-			  .then(console.log)
-			  .catch(console.error);
-
-
+    	//データ転送
+	function sendResultToSheet(car) {	 
+		 fetch("https://script.google.com/macros/s/AKfycbybv-tjxQLkup8xmyMZ8BWKYkYspO1XTpx66OXFgFfb7L-U6Hko8lvwyPtif2rjKz2I/exec", {
+		        method: "POST",
+		        mode: "no-cors",  // ← これでCORSチェックを無視して送信だけする
+		        headers: {
+		          "Content-Type": "text/plain"  // ただしこのContent-Typeは一部制限あり
+		        },
+		        body: JSON.stringify({
+		          shumId: 1,
+		          feeling: 5,
+		          runTime: 100,
+		          totalLength: 500,
+		          CO2: 50,
+		          routeId: 1
+		        }),
+		      })
+		      .catch(err => {
+		        // no-corsモードではfetchは成功でもレスポンスは opaque で中身が取れません
+		        console.log("送信完了（レスポンスは取得不可）");
+		      });
 	}
 
 
