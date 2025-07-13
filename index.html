@@ -13,6 +13,7 @@
         <input type="number" id="scenarioInput" placeholder="例: 1" />
         <button onclick="onStartClick()">開始</button>
     </div>
+	<div id="timerDisplay" style="text-align:center; font-size:20px; margin:10px;">経過時間: 0秒</div>
     <!--描画枠の設定-->
     <canvas id="trafficCanvas" width="800" height="3600" style="display:none;"></canvas>
 
@@ -56,50 +57,52 @@
     ];
     
     let mapList = [];
-let sigTimer = [];
-let time = 0;
+	let sigTimer = [];
+	let time = 0;
 	let ID = "";
-
-// ボタンを押したときの処理
-function onStartClick() {
-    const scenarioId = document.getElementById("scenarioInput").value;
-    if (!scenarioId) {
-        alert("正しいシナリオ番号を入力してください。");
-        return;
-    }else{
-	    ID = scenarioId;
-    }
-
-    // キャンバス表示
-    canvas.style.display = "block";
-
-    // パラメータを取得してシミュレーション開始
-    const PARAMS_URL = `https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec?scenario=${scenarioId}`;
-
-    fetch(PARAMS_URL)
-        .then(res => res.json())
-        .then(data => {
-            settings = {
-                car_spawn_rate_Y: parseInt(data.params.car_spawn_rate_Y),
-                car_spawn_rate_X1: parseInt(data.params.car_spawn_rate_X1),
-                car_spawn_rate_X2: parseInt(data.params.car_spawn_rate_X2),
-                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
-                car_length: parseFloat(data.params.car_length_m),
-                acceleration: parseFloat(data.params.acceleration_mps2)
-            };
-            mapList = data.map;
-            sigTimer = data.signal;
-
-            firstSigSet();
-            requestAnimationFrame(loop);
-            spawnCarFromTopLoop();
-            spawnCarFromBottomLoop();
-            spawnCarFromLeft1Loop();
-            spawnCarFromRight1Loop();
-            spawnCarFromLeft2Loop();
-            spawnCarFromRight2Loop();
-        });
-}
+	let simulationStartTime = null;
+	
+	// ボタンを押したときの処理
+	function onStartClick() {
+	    const scenarioId = document.getElementById("scenarioInput").value;
+	    if (!scenarioId) {
+	        alert("正しいシナリオ番号を入力してください。");
+	        return;
+	    }else{
+		    ID = scenarioId;
+	    }
+		simulationStartTime = Date.now(); // ← ここで記録
+	
+	    // キャンバス表示
+	    canvas.style.display = "block";
+	
+	    // パラメータを取得してシミュレーション開始
+	    const PARAMS_URL = `https://script.google.com/macros/s/AKfycbwBBFI6Q_l6yj1cqzOlR9kJa4iaqqnxHiIEBD3vIWCHl4jZLTUAOuL-pYGVu2U_2u40/exec?scenario=${scenarioId}`;
+	
+	    fetch(PARAMS_URL)
+	        .then(res => res.json())
+	        .then(data => {
+	            settings = {
+	                car_spawn_rate_Y: parseInt(data.params.car_spawn_rate_Y),
+	                car_spawn_rate_X1: parseInt(data.params.car_spawn_rate_X1),
+	                car_spawn_rate_X2: parseInt(data.params.car_spawn_rate_X2),
+	                car_speed_max: parseFloat(data.params.car_speed_max_kmh) / 3.6,
+	                car_length: parseFloat(data.params.car_length_m),
+	                acceleration: parseFloat(data.params.acceleration_mps2)
+	            };
+	            mapList = data.map;
+	            sigTimer = data.signal;
+	
+	            firstSigSet();
+	            requestAnimationFrame(loop);
+	            spawnCarFromTopLoop();
+	            spawnCarFromBottomLoop();
+	            spawnCarFromLeft1Loop();
+	            spawnCarFromRight1Loop();
+	            spawnCarFromLeft2Loop();
+	            spawnCarFromRight2Loop();
+	        });
+	}
 
     function firstSigSet(){
         for(let i = 0;i<signals.length;i++){
@@ -806,7 +809,11 @@ function onStartClick() {
     function loop(now) {
         let delta = now - lastTime;
         lastTime = now;
-    
+    	if (simulationStartTime !== null) {
+	        const elapsedMs = Date.now() - simulationStartTime;
+	        const elapsedSec = Math.floor(elapsedMs / 1000);
+	        document.getElementById("timerDisplay").textContent = `経過時間: ${elapsedSec}秒`;
+	    }
         updateSignals(delta);
         updateCars(delta);
         draw();
