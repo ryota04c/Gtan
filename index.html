@@ -686,10 +686,10 @@
     }
     //データ転送
     function sendResultToSheet(car) {
-	  fetch("https://script.google.com/macros/s/AKfycby5MR0M818XfrdilF7SJhECSAhObj1RlmyW1s2Sn8dyTdnvkPwlnDFDu2HriXXoMKa0/exec", {
+	  fetch("https://script.google.com/macros/s/AKfycbx_WxWvkhEATZBh5V6iXZ0_fBaFgvgH3GXUH8MpY_F-BaereJjuoT2mPMLDYo7CVh2d/exec", {
 	    method: "POST",
 	    headers: {
-	      "Content-Type": "application/json" // ← 修正済み
+	      "Content-Type": "application/json"
 	    },
 	    body: JSON.stringify({
 	      shumId: shumId,
@@ -704,6 +704,7 @@
 	  .then(data => console.log("送信成功:", data))
 	  .catch(err => console.error("送信失敗:", err));
 	}
+
 
     
     function draw() {
